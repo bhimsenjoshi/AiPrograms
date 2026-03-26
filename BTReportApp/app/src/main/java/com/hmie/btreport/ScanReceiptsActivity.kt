@@ -47,10 +47,7 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
 
     fun scanAll(tripId: Int) = viewModelScope.launch {
         val context = getApplication<android.app.Application>()
-        val apiKey = SettingsActivity.getApiKey(context)
-        if (apiKey.isBlank()) return@launch
-
-        val service = ClaudeApiService(apiKey)
+        val service = AiReceiptService.fromSettings(context)
         val list = items.value ?: return@launch
 
         list.forEachIndexed { index, item ->
@@ -129,11 +126,15 @@ class ScanReceiptsActivity : AppCompatActivity() {
 
         tripId = intent.getIntExtra(EXTRA_TRIP_ID, 0)
 
-        // Check API key
-        if (SettingsActivity.getApiKey(this).isBlank()) {
+        // Check if settings configured
+        val prefs = SettingsActivity.getPrefs(this)
+        val provider = prefs.getString(SettingsActivity.KEY_AI_PROVIDER, null)
+        val needsKey = provider != AiReceiptService.Provider.OLLAMA.name
+        val keyMissing = needsKey && SettingsActivity.getApiKey(this).isBlank()
+        if (provider == null || keyMissing) {
             AlertDialog.Builder(this)
-                .setTitle("Claude API Key Required")
-                .setMessage("Please add your Claude API key in Settings to use AI scanning.")
+                .setTitle("AI Provider Not Configured")
+                .setMessage("Please choose an AI provider in Settings.\nGroq and Gemini are FREE!")
                 .setPositiveButton("Go to Settings") { _, _ ->
                     startActivity(Intent(this, SettingsActivity::class.java))
                     finish()
