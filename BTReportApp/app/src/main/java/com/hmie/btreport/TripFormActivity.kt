@@ -38,7 +38,7 @@ class TripFormViewModel(app: android.app.Application) : AndroidViewModel(app) {
     fun autoDetectFromExpenses(tripId: Int, onResult: (startDate: String, endDate: String, route: String) -> Unit) =
         viewModelScope.launch {
             val expenses = db.expenseDao().getExpensesForTripSync(tripId)
-            val summary = ClaudeApiService("").inferTripSummary(expenses)
+            val summary = AiReceiptService.fromSettings(getApplication()).inferTripSummary(expenses)
             onResult(summary.startDate, summary.endDate, summary.route)
         }
 }

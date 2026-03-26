@@ -43,7 +43,7 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
     fun autoUpdateTripDetails(tripId: Int, onDone: () -> Unit) = viewModelScope.launch {
         val trip = db.tripDao().getTripById(tripId) ?: return@launch
         val expenses = db.expenseDao().getExpensesForTripSync(tripId)
-        val summary = ClaudeApiService("").inferTripSummary(expenses)
+        val summary = AiReceiptService.fromSettings(getApplication()).inferTripSummary(expenses)
 
         val updated = trip.copy(
             startDate = summary.startDate.ifBlank { trip.startDate },
