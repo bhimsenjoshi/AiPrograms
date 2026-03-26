@@ -6,131 +6,120 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent" android:layout_height="wrap_content">
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
+            android:id="@+id/toolbar" android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            app:titleTextColor="@android:color/white"/>
+            android:background="@color/primary" app:titleTextColor="@android:color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            <!-- Auto-detect button (only visible when editing) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAutoDetect"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Auto-detect Dates &amp; Route from Scanned Receipts"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:backgroundTint="@color/secondary"/>
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="Employee Information" android:textStyle="bold"
-                android:textSize="14sp" android:textColor="@color/primary"
-                android:layout_marginBottom="8dp"/>
+                android:textSize="14sp" android:textColor="@color/primary" android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Employee Name *" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Employee Name *" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmployeeName"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:inputType="textPersonName"/>
+                    android:id="@+id/etEmployeeName" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="textPersonName"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Employee ID / Number" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Employee ID" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmployeeId"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    android:id="@+id/etEmployeeId" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Department" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Department" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDepartment"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    android:id="@+id/etDepartment" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Designation" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Designation" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDesignation"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    android:id="@+id/etDesignation" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Cost Center" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp">
+                android:hint="Cost Center" android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCostCenter"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                    android:id="@+id/etCostCenter" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="Trip Details" android:textStyle="bold"
-                android:textSize="14sp" android:textColor="@color/primary"
-                android:layout_marginBottom="8dp"/>
+                android:textSize="14sp" android:textColor="@color/primary" android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Purpose of Visit" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Purpose of Visit" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPurpose"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:inputType="textMultiLine" android:lines="2"/>
+                    android:id="@+id/etPurpose" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="textMultiLine" android:lines="2"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Start Date * (tap to pick)" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="Start Date (tap to pick)" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etStartDate"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:focusable="false" android:clickable="true"/>
+                    android:id="@+id/etStartDate" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:focusable="false" android:clickable="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="End Date (tap to pick)" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:hint="End Date (tap to pick)" android:layout_marginBottom="10dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEndDate"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:focusable="false" android:clickable="true"/>
+                    android:id="@+id/etEndDate" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:focusable="false" android:clickable="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:hint="Route (e.g. HYD-BLR-PNQ-HYD)" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="24dp">
+                android:hint="Route (e.g. HYD-BLR-PNQ-HYD)" android:layout_marginBottom="20dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRoute"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters"/>
+                    android:id="@+id/etRoute" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="textCapCharacters"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Save Trip"
-                android:textSize="16sp"
+                android:id="@+id/btnSave" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Save Trip"
                 app:backgroundTint="@color/primary"/>
-
         </LinearLayout>
     </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
