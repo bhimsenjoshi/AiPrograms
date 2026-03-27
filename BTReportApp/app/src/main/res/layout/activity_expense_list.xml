@@ -25,7 +25,7 @@
             android:text="📷  Scan Receipts with AI"
             android:textSize="15sp"
             app:backgroundTint="@color/secondary"
-            app:icon="@android:drawable/ic_menu_camera"/>
+            app:icon="@drawable/ic_camera"/>
 
         <!-- Total bar -->
         <TextView android:id="@+id/tvTotal"
@@ -54,7 +54,7 @@
             android:layout_margin="10dp"
             android:text="Generate Excel + Word Documents"
             android:textSize="15sp" app:backgroundTint="@color/primary"
-            app:icon="@android:drawable/ic_menu_save"/>
+            app:icon="@drawable/ic_save"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -62,7 +62,7 @@
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="bottom|end" android:layout_margin="80dp"
         android:contentDescription="Add Expense Manually"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_add"
         app:backgroundTint="@color/primary"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
