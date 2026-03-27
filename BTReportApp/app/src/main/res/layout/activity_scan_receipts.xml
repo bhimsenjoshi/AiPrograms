@@ -21,7 +21,8 @@
         <!-- Instruction banner -->
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@color/primary_container" android:padding="12dp"
-            android:text="Pick boarding passes, cab receipts, food bills (images or PDFs). Claude AI will auto-identify and extract all details."
+            android:id="@+id/tvBanner"
+            android:text="Pick boarding passes, cab receipts, food bills (images or PDFs). AI will auto-identify and extract all details."
             android:textColor="@color/on_primary_container" android:textSize="13sp"/>
 
         <!-- Status row -->
@@ -68,7 +69,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnScanAll"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Scan All with Claude AI"
+                android:text="Scan All"
                 android:enabled="false"
                 android:layout_marginBottom="8dp"
                 app:backgroundTint="@color/secondary"/>

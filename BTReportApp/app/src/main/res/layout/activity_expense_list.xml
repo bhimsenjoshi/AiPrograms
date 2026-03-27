@@ -22,7 +22,7 @@
             android:id="@+id/btnScanReceipts"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="📷  Scan Receipts with Claude AI"
+            android:text="📷  Scan Receipts with AI"
             android:textSize="15sp"
             app:backgroundTint="@color/secondary"
             app:icon="@android:drawable/ic_menu_camera"/>

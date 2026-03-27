@@ -144,6 +144,16 @@ class ScanReceiptsActivity : AppCompatActivity() {
             return
         }
 
+        // Show the active provider name in UI
+        val providerName = try {
+            AiReceiptService.Provider.valueOf(
+                prefs.getString(SettingsActivity.KEY_AI_PROVIDER, AiReceiptService.Provider.GROQ.name)!!
+            ).displayName
+        } catch (e: Exception) { "AI" }
+        supportActionBar?.title = "Scan Receipts – $providerName"
+        b.btnScanAll.text = "Scan All with $providerName"
+        b.tvBanner.text = "Pick boarding passes, cab receipts, food bills (images or PDFs).\n$providerName will auto-identify and extract all details."
+
         adapter = ScanResultAdapter()
         b.rvScanResults.layoutManager = LinearLayoutManager(this)
         b.rvScanResults.adapter = adapter

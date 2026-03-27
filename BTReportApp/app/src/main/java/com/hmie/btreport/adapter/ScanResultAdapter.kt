@@ -24,7 +24,7 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.tvResult.visibility = View.GONE
                 }
                 ScanStatus.SCANNING -> {
-                    b.tvStatus.text = "Scanning with Claude AI..."
+                    b.tvStatus.text = "Scanning…"
                     b.tvStatus.setTextColor(0xFF1565C0.toInt())
                     b.progressScan.visibility = View.VISIBLE
                     b.tvResult.visibility = View.GONE
