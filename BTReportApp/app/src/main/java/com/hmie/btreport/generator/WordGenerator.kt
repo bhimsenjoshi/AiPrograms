@@ -80,15 +80,17 @@ class WordGenerator(private val context: Context) {
 
     // ── Image helpers ─────────────────────────────────────────────────────────
 
-    private fun loadResized(path: String): ByteArray? = try {
-        val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
-        BitmapFactory.decodeFile(path, opts)
-        var sample = 1
-        while (opts.outWidth / sample > 1200 || opts.outHeight / sample > 1600) sample *= 2
-        val bmp = BitmapFactory.decodeFile(path, BitmapFactory.Options().also { it.inSampleSize = sample })
-            ?: return null
-        ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray()
-    } catch (e: Exception) { null }
+    private fun loadResized(path: String): ByteArray? {
+        return try {
+            val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(path, opts)
+            var sample = 1
+            while (opts.outWidth / sample > 1200 || opts.outHeight / sample > 1600) sample *= 2
+            val bmp = BitmapFactory.decodeFile(path, BitmapFactory.Options().also { it.inSampleSize = sample })
+                ?: return null
+            ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray()
+        } catch (e: Exception) { null }
+    }
 
     private fun imageDims(path: String): Pair<Long, Long> {
         val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
