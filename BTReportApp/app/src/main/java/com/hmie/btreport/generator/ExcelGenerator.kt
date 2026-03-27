@@ -14,11 +14,10 @@ import java.util.zip.ZipOutputStream
 class ExcelGenerator(private val context: Context) {
 
     companion object {
-        const val COMPANY      = "HYUNDAI MOTOR INDIA ENGINEERING PVT LTD"
-        const val COMPANY_FULL = "Hyundai Motor India Engineering Private Limited"
+        const val COMPANY      = "HMIE"
+        const val COMPANY_FULL = "HMIE"
         const val DA_FIRST_DAY = 1000.0
         const val DA_OTHER     = 2000.0
-        const val CREDIT       = "App developed by Bhimsen Joshi – Software Development Dept, HMIE"
     }
 
     private data class DayRow(
@@ -302,7 +301,6 @@ $merges
         sb.row(r++,36){c("A",it,"I undertake that the details / documents furnished by me are correct.  If any information found to be incorrect, I am liable for any disciplinary action against me, as may be decided by Management.",S4)}
         merge("C${r}:G${r}"); sb.row(r++,18){c("C",it,COMPANY_FULL,S3)}
         sb.row(r++,8){""}
-        merge("A${r}:I${r}"); sb.row(r++,14){c("A",it,CREDIT,S9)}
 
         return ws(colDefs(12.0,14.0,12.0,10.0,10.0,10.0,10.0,10.0,12.0), sb.toString(),
             mc(*merges.toTypedArray()))

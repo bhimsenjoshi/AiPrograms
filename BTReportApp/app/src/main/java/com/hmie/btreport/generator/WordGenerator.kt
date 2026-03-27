@@ -21,9 +21,8 @@ import java.util.zip.ZipOutputStream
 class WordGenerator(private val context: Context) {
 
     companion object {
-        const val COMPANY      = "HYUNDAI MOTOR INDIA ENGINEERING PVT LTD"
-        const val COMPANY_FULL = "Hyundai Motor India Engineering Private Limited"
-        const val CREDIT       = "Developed by Bhimsen Joshi – Software Development Department, HMIE"
+        const val COMPANY      = "HMIE"
+        const val COMPANY_FULL = "HMIE"
         // 1 inch = 914400 EMU
         const val IMG_MAX_W_EMU = 3657600L   // 4 inches max width
         const val IMG_MAX_H_EMU = 4572000L   // 5 inches max height
@@ -218,9 +217,6 @@ class WordGenerator(private val context: Context) {
         sb.para("")
         sb.para("HR / Finance:       _________________________    Date: ________________")
         sb.para("")
-
-        // ── Credit ──
-        sb.centerPara(CREDIT, bold = false, sz = 16)
 
         sb.append("""<w:sectPr>
   <w:pgSz w:w="12240" w:h="15840"/>
