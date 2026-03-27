@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
  * Unified AI receipt scanning service.
  *
  * Supported providers:
- *  GROQ    – Free. Get key at console.groq.com. Uses llama-3.2-vision.
+ *  GROQ    – Free. Get key at console.groq.com. Uses Llama 4 Scout vision.
  *  GEMINI  – Free. Get key at aistudio.google.com. Uses gemini-1.5-flash.
  *  OLLAMA  – Local. No key. Run Ollama on your PC with a vision model.
  *  CLAUDE  – Paid. Get key at console.anthropic.com.
@@ -43,7 +43,7 @@ class AiReceiptService(private val config: Config) {
     )
 
     enum class Provider(val displayName: String) {
-        GROQ("Groq (Free – LLaMA Vision)"),
+        GROQ("Groq (Free – Llama 4 Scout)"),
         GEMINI("Google Gemini (Free)"),
         OLLAMA("Ollama (Local – No key)"),
         CLAUDE("Claude (Paid)")
@@ -100,7 +100,7 @@ class AiReceiptService(private val config: Config) {
     // ── Groq (OpenAI-compatible, free) ───────────────────────────────────────
 
     private fun callGroq(base64: String): ReceiptData {
-        val model = "llama-3.2-90b-vision-preview"
+        val model = "meta-llama/llama-4-scout-17b-16e-instruct"
         return callOpenAiCompatible(
             url = "https://api.groq.com/openai/v1/chat/completions",
             model = model,
