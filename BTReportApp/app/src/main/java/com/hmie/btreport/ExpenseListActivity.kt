@@ -88,14 +88,7 @@ class ExpenseListActivity : AppCompatActivity() {
         supportActionBar?.title = tripName
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Update scan button to show active AI provider name
-        val providerName = try {
-            AiReceiptService.Provider.valueOf(
-                SettingsActivity.getPrefs(this)
-                    .getString(SettingsActivity.KEY_AI_PROVIDER, AiReceiptService.Provider.GROQ.name)!!
-            ).displayName
-        } catch (e: Exception) { "AI" }
-        b.btnScanReceipts.text = "📷  Scan Receipts with $providerName"
+        b.btnScanReceipts.text = "Scan Receipts"
 
         val adapter = ExpenseAdapter(
             onEdit = { exp ->

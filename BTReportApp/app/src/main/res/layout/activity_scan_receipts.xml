@@ -3,81 +3,122 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F5F7FA">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar" android:layout_width="match_parent"
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary" app:titleTextColor="@android:color/white"/>
+            android:background="@color/primary"
+            app:titleTextColor="@android:color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
-        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Instruction banner -->
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:background="@color/primary_container" android:padding="12dp"
-            android:id="@+id/tvBanner"
-            android:text="Pick boarding passes, cab receipts, food bills (images or PDFs). AI will auto-identify and extract all details."
-            android:textColor="@color/on_primary_container" android:textSize="13sp"/>
+        <!-- Instruction card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/primary_container">
+
+            <TextView
+                android:id="@+id/tvBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="Upload boarding passes, cab receipts or food bills (images or PDFs). AI will auto-identify type, extract amounts and route."
+                android:textColor="@color/on_primary_container"
+                android:textSize="13sp"/>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Status row -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
+            android:gravity="center_vertical">
 
-            <ProgressBar android:id="@+id/progressBar"
-                android:layout_width="24dp" android:layout_height="24dp"
-                android:layout_marginEnd="8dp" android:visibility="gone"/>
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"/>
 
-            <TextView android:id="@+id/tvScanStatus"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:textSize="13sp"
+            <TextView
+                android:id="@+id/tvScanStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="13sp"
                 android:textColor="@color/on_surface_variant"/>
         </LinearLayout>
 
-        <!-- Receipt list -->
-        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+        <!-- List -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvScanResults"
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:padding="8dp"/>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:clipToPadding="false"/>
 
-            <TextView android:id="@+id/tvEmpty"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No receipts added yet.\nTap 'Pick Files' to begin."
-                android:textAlignment="center" android:textColor="@color/on_surface_variant"/>
+                android:text="No files added yet.\nTap 'Choose Files' to begin."
+                android:textAlignment="center"
+                android:textColor="@color/on_surface_variant"/>
         </FrameLayout>
 
-        <!-- Action buttons -->
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="12dp">
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPickFiles"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Pick Files (Images / PDFs)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:text="Choose Files"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnScanAll"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:text="Scan All"
                 android:enabled="false"
-                android:layout_marginBottom="8dp"
                 app:backgroundTint="@color/secondary"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddAll"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="Add All Expenses to Trip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save All Expenses"
                 android:enabled="false"
                 app:backgroundTint="@color/primary"/>
         </LinearLayout>

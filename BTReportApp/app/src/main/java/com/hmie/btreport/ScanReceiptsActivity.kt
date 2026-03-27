@@ -67,10 +67,12 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
     }
 
     fun saveAllExpenses(tripId: Int, onDone: (Int) -> Unit) = viewModelScope.launch {
+        val context = getApplication<android.app.Application>()
         val list = items.value ?: return@launch
         var count = 0
         list.filter { it.status == ScanStatus.SUCCESS && it.result != null }.forEach { item ->
             val r = item.result!!
+            val savedImage = copyImageToStorage(context, item.uri)
             db.expenseDao().insertExpense(
                 Expense(
                     tripId = tripId,
@@ -80,12 +82,25 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
                     fromCity = r.fromCity,
                     toCity = r.toCity,
                     receiptRef = r.receiptRef,
-                    amount = r.amount
+                    amount = r.amount,
+                    imageUri = savedImage
                 )
             )
             count++
         }
         onDone(count)
+    }
+
+    private fun copyImageToStorage(context: android.app.Application, uri: android.net.Uri): String? {
+        return try {
+            val dir = java.io.File(context.filesDir, "receipts").also { it.mkdirs() }
+            val ext = context.contentResolver.getType(uri)?.let {
+                when { it.contains("png") -> "png"; else -> "jpg" }
+            } ?: "jpg"
+            val dest = java.io.File(dir, "${System.currentTimeMillis()}.$ext")
+            context.contentResolver.openInputStream(uri)?.use { i -> dest.outputStream().use { o -> i.copyTo(o) } }
+            dest.absolutePath
+        } catch (e: Exception) { null }
     }
 
     private fun getFileName(context: android.app.Application, uri: Uri): String {
@@ -144,15 +159,8 @@ class ScanReceiptsActivity : AppCompatActivity() {
             return
         }
 
-        // Show the active provider name in UI
-        val providerName = try {
-            AiReceiptService.Provider.valueOf(
-                prefs.getString(SettingsActivity.KEY_AI_PROVIDER, AiReceiptService.Provider.GROQ.name)!!
-            ).displayName
-        } catch (e: Exception) { "AI" }
-        supportActionBar?.title = "Scan Receipts – $providerName"
-        b.btnScanAll.text = "Scan All with $providerName"
-        b.tvBanner.text = "Pick boarding passes, cab receipts, food bills (images or PDFs).\n$providerName will auto-identify and extract all details."
+        supportActionBar?.title = "Scan Receipts"
+        b.tvBanner.text = "Upload boarding passes, cab receipts or food bills (images or PDFs). AI will auto-identify type, extract amounts and route."
 
         adapter = ScanResultAdapter()
         b.rvScanResults.layoutManager = LinearLayoutManager(this)

@@ -24,7 +24,8 @@ data class Expense(
     val fromCity: String = "",
     val toCity: String = "",
     val receiptRef: String = "",
-    val amount: Double = 0.0
+    val amount: Double = 0.0,
+    val imageUri: String? = null   // path to locally saved receipt image
 )
 
 enum class ExpenseType(val displayName: String) {
