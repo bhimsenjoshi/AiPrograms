@@ -53,7 +53,8 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.tvCategory.text = r.expenseType.displayName
                     if (r.fromCity.isNotBlank()) {
                         b.layoutRoute.visibility = View.VISIBLE
-                        b.tvRoute.text = "${r.fromCity} → ${r.toCity}"
+                        val timeStr = if (r.departureTime.isNotBlank()) "  ·  Dep ${r.departureTime}" else "  ·  NO DEP TIME"
+                        b.tvRoute.text = "${r.fromCity} → ${r.toCity}$timeStr"
                     } else {
                         b.layoutRoute.visibility = View.GONE
                     }

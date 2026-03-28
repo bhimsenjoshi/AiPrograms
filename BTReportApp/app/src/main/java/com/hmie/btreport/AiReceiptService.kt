@@ -362,28 +362,34 @@ class AiReceiptService(private val config: Config) {
     // ── Factory ───────────────────────────────────────────────────────────────
 
     companion object {
-        const val RECEIPT_PROMPT = """Analyze this business travel expense receipt/document.
+        const val RECEIPT_PROMPT = """You are extracting structured data from a business travel receipt or boarding pass image.
 
-Return ONLY a JSON object (no markdown, no extra text):
+Return ONLY a valid JSON object with NO markdown fences, NO extra text:
 {
   "expense_type": "FLIGHT" or "CAB" or "FOOD" or "HOTEL" or "OTHER",
   "date": "dd-MMM-yyyy e.g. 22-Mar-2026",
-  "departure_time": "HH:mm 24-hour departure/boarding time e.g. 06:20, blank string if not a flight or not visible",
-  "amount": total amount paid as a number in INR,
-  "description": "short description e.g. IX-2934 HYD-BLR or Chai Point BLR Airport",
-  "from_city": "departure or pickup IATA city code e.g. HYD",
-  "to_city": "arrival or drop IATA city code e.g. BLR",
+  "departure_time": "HH:mm in 24-hour format e.g. 06:20",
+  "amount": total amount paid as a number in INR (0 if not shown),
+  "description": "e.g. IX-2934 HYD-BLR",
+  "from_city": "IATA city code e.g. HYD",
+  "to_city": "IATA city code e.g. BLR",
   "receipt_ref": "flight number, booking ID, or bill number",
-  "operator": "airline, cab service, or restaurant name"
+  "operator": "airline or service name"
 }
 
-Rules:
-- Boarding pass → FLIGHT. IATA codes: HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai.
-- For flights: departure_time is the scheduled departure time printed on the boarding pass (24-hour HH:mm).
-- Cab receipt (Rapido/QuickRide/Ola/Uber/auto) → CAB.
-- Restaurant/cafe/food court → FOOD.
-- Hotel/lodge → HOTEL.
-- amount = final total paid. Use 0 if not visible."""
+CRITICAL RULES for boarding passes (expense_type = FLIGHT):
+- departure_time MUST be filled. Every boarding pass prints a departure or STD time.
+  Look for labels: "Dep", "Departure", "STD", "Departs", "Boarding", or a standalone time like "06:20".
+  Convert to 24-hour HH:mm format. NEVER leave this blank for a FLIGHT.
+- from_city and to_city must be IATA codes. Common Indian codes:
+  HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai, MAA=Chennai, CCU=Kolkata, COK=Kochi.
+- receipt_ref = flight number (e.g. 6E-345, IX-2934, AI-101).
+
+Other rules:
+- Cab receipt (Rapido/QuickRide/Ola/Uber/auto) → CAB. departure_time = "".
+- Restaurant/cafe/food court → FOOD. departure_time = "".
+- Hotel/lodge → HOTEL. departure_time = "".
+- amount = final total paid in INR."""
 
         fun fromSettings(context: Context): AiReceiptService {
             val prefs = SettingsActivity.getPrefs(context)
