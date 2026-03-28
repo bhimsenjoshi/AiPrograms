@@ -25,7 +25,7 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- ── TOTAL REIMBURSEMENT card (dark navy) ───────────────────── -->
+        <!-- ── TOTAL REIMBURSEMENT card ───────────────────────────────── -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,14 +87,14 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ── CATEGORY summary grid ─────────────────────────────────── -->
+        <!-- ── CATEGORY summary ───────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="12dp">
 
-            <!-- Flight Route – full width (replaces flights total) -->
+            <!-- Flight Route – full width -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -102,101 +102,208 @@
                 app:cardCornerRadius="10dp"
                 app:cardElevation="1dp"
                 app:cardBackgroundColor="#EEF2FF">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:paddingHorizontal="14dp" android:paddingVertical="12dp"
-                    android:gravity="center_vertical" android:orientation="horizontal">
-                    <TextView android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="✈" android:textSize="18sp" android:gravity="center"
-                        android:textColor="@color/cat_flight"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <!-- Icon circle -->
+                    <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="✈"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:background="@drawable/chip_gray_bg"
+                        android:backgroundTint="#3F51B5"
+                        android:textColor="#FFFFFF"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
                         android:layout_marginStart="10dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="FLIGHT ROUTE" android:textSize="10sp"
-                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"/>
-                        <TextView android:id="@+id/tvFlightRoute"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FLIGHT ROUTE"
+                            android:textSize="9sp"
+                            android:textColor="@color/on_surface_variant"
+                            android:letterSpacing="0.05"/>
+                        <TextView
+                            android:id="@+id/tvFlightRoute"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="—"
-                            android:textSize="17sp" android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
                             android:textColor="@color/cat_flight"
-                            android:maxLines="1" android:ellipsize="end"/>
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Cab – full width -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Cab + Food + Hotel – single row of 3 compact boxes -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                app:cardCornerRadius="10dp" app:cardElevation="1dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:paddingHorizontal="14dp" android:paddingVertical="12dp"
-                    android:gravity="center_vertical" android:orientation="horizontal">
-                    <TextView android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="🚗" android:textSize="16sp" android:gravity="center"/>
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:orientation="vertical"
-                        android:layout_marginStart="10dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="CAB / TRANSPORT" android:textSize="10sp"
-                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"/>
-                        <TextView android:id="@+id/tvCabTotal"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="₹0" android:textSize="17sp" android:textStyle="bold"
-                            android:textColor="@color/text_primary"/>
-                    </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="›" android:textSize="20sp" android:textColor="@color/on_surface_variant"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:orientation="horizontal"
+                android:layout_marginBottom="6dp">
 
-            <!-- Food + Hotel side by side -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:layout_marginBottom="6dp">
-
+                <!-- CAB -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp" android:layout_height="match_parent"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    app:cardCornerRadius="10dp" app:cardElevation="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:padding="12dp" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="🍽" android:textSize="18sp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="FOOD" android:textSize="10sp"
-                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"
-                            android:layout_marginTop="4dp"/>
-                        <TextView android:id="@+id/tvFoodTotal"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="₹0" android:textSize="16sp" android:textStyle="bold"
-                            android:textColor="@color/text_primary"/>
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="1dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:text="🚗"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:background="@drawable/chip_gray_bg"
+                            android:backgroundTint="#E65100"/>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="6dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="CAB"
+                                android:textSize="9sp"
+                                android:textColor="@color/on_surface_variant"
+                                android:letterSpacing="0.05"/>
+                            <TextView
+                                android:id="@+id/tvCabTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_primary"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- FOOD -->
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp" android:layout_height="match_parent"
-                    android:layout_weight="1" android:layout_marginStart="4dp"
-                    app:cardCornerRadius="10dp" app:cardElevation="1dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:padding="12dp" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="🏨" android:textSize="18sp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="HOTEL" android:textSize="10sp"
-                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"
-                            android:layout_marginTop="4dp"/>
-                        <TextView android:id="@+id/tvHotelTotal"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="₹0" android:textSize="16sp" android:textStyle="bold"
-                            android:textColor="@color/text_primary"/>
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="2dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="1dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:text="🍽"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:background="@drawable/chip_gray_bg"
+                            android:backgroundTint="#2E7D32"/>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="6dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="FOOD"
+                                android:textSize="9sp"
+                                android:textColor="@color/on_surface_variant"
+                                android:letterSpacing="0.05"/>
+                            <TextView
+                                android:id="@+id/tvFoodTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_primary"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <!-- HOTEL -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="1dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="10dp"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:text="🏨"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:background="@drawable/chip_gray_bg"
+                            android:backgroundTint="#1565C0"/>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="6dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="HOTEL"
+                                android:textSize="9sp"
+                                android:textColor="@color/on_surface_variant"
+                                android:letterSpacing="0.05"/>
+                            <TextView
+                                android:id="@+id/tvHotelTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹0"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_primary"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- ── EXPENSE DOCUMENTS section ─────────────────────────────── -->
+        <!-- ── ADD EXPENSES section ───────────────────────────────────── -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -206,10 +313,10 @@
             android:textColor="@color/on_surface_variant"
             android:letterSpacing="0.08"
             android:paddingHorizontal="14dp"
-            android:paddingTop="10dp"
+            android:paddingTop="8dp"
             android:paddingBottom="6dp"/>
 
-        <!-- Scan + Gmail import buttons side by side -->
+        <!-- Scan + Gmail import buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -223,8 +330,10 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Scan"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:maxLines="1"
                 app:backgroundTint="@color/primary"
                 app:icon="@drawable/ic_camera"
@@ -238,8 +347,10 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="Gmail"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:maxLines="1"
                 app:backgroundTint="@color/cat_flight"
                 app:icon="@drawable/ic_settings"
@@ -249,23 +360,23 @@
 
         </LinearLayout>
 
-        <!-- Remove duplicates (shown only when list has entries) -->
+        <!-- Remove duplicates -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRemoveDuplicates"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="40dp"
             android:layout_marginHorizontal="12dp"
             android:layout_marginBottom="8dp"
             android:minHeight="0dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:text="Remove Duplicate Entries"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:maxLines="1"
             android:visibility="gone"
             app:strokeColor="@color/warning"
             app:icon="@drawable/ic_save"
-            app:iconSize="16dp"
+            app:iconSize="14dp"
             app:iconPadding="6dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
@@ -280,7 +391,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingHorizontal="12dp"
-                android:paddingBottom="88dp"
+                android:paddingBottom="72dp"
                 android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
@@ -289,7 +400,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No receipts yet.\nTap Scan to auto-import or + to add manually."
+                android:text="No receipts yet.\nTap Scan to auto-import or Add to enter manually."
                 android:textAlignment="center"
                 android:textColor="@color/on_surface_variant"
                 android:visibility="gone"/>
@@ -297,41 +408,52 @@
 
     </LinearLayout>
 
-    <!-- Floating action button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="72dp"
-        android:contentDescription="Add Expense"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary"/>
-
-    <!-- Bottom action bar -->
+    <!-- Bottom action bar: Add Expense + Generate Reports side by side -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="60dp"
         android:layout_gravity="bottom"
         android:background="@color/surface"
         android:elevation="8dp"
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
         android:gravity="center_vertical">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGenerateDocs"
-            android:layout_width="match_parent"
+            android:id="@+id/fab"
+            android:layout_width="0dp"
             android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Add Expense"
+            android:textSize="12sp"
+            android:maxLines="1"
+            app:backgroundTint="#37474F"
+            app:icon="@drawable/ic_add"
+            app:iconSize="16dp"
+            app:iconPadding="4dp"
+            style="@style/Widget.MaterialComponents.Button"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGenerateDocs"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="2"
+            android:layout_marginStart="6dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:text="Generate Reports"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:maxLines="1"
             app:backgroundTint="@color/primary"
             app:icon="@drawable/ic_save"
             app:iconSize="16dp"
-            app:iconPadding="6dp"
+            app:iconPadding="4dp"
             style="@style/Widget.MaterialComponents.Button"/>
+
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
