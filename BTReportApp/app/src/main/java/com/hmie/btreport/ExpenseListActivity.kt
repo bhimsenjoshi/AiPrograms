@@ -70,7 +70,6 @@ class ExpenseListActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             Toast.makeText(this, "Expenses added from receipts!", Toast.LENGTH_SHORT).show()
-            // Auto-update trip dates and route after scanning
             vm.autoUpdateTripDetails(vm.tripId) {}
         }
     }
@@ -130,6 +129,21 @@ class ExpenseListActivity : AppCompatActivity() {
             scanLauncher.launch(Intent(this, ScanReceiptsActivity::class.java).apply {
                 putExtra(ScanReceiptsActivity.EXTRA_TRIP_ID, tripId)
             })
+        }
+
+        // Import from Gmail
+        b.btnGmailImport.setOnClickListener {
+            vm.viewModelScope.launch {
+                val trip = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    com.hmie.btreport.db.AppDatabase.getDatabase(this@ExpenseListActivity)
+                        .tripDao().getTripById(tripId)
+                }
+                startActivity(Intent(this@ExpenseListActivity, GmailImportActivity::class.java).apply {
+                    putExtra(GmailImportActivity.EXTRA_TRIP_ID, tripId)
+                    putExtra(GmailImportActivity.EXTRA_START_DATE, trip?.startDate ?: "")
+                    putExtra(GmailImportActivity.EXTRA_END_DATE, trip?.endDate ?: "")
+                })
+            }
         }
 
         // Manual add

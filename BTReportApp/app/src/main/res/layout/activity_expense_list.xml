@@ -195,31 +195,52 @@
         </LinearLayout>
 
         <!-- ── EXPENSE DOCUMENTS section ─────────────────────────────── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ADD EXPENSES"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_surface_variant"
+            android:letterSpacing="0.08"
+            android:paddingHorizontal="14dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="6dp"/>
+
+        <!-- Scan + Gmail import buttons side by side -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="10dp"
-            android:gravity="center_vertical">
-            <TextView
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScanReceipts"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Expense Documents"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnScanReceipts"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="Scan"
+                android:layout_marginEnd="6dp"
+                android:text="Scan Receipts"
                 android:textSize="12sp"
                 app:backgroundTint="@color/primary"
                 app:icon="@drawable/ic_camera"
                 app:iconSize="14dp"
                 style="@style/Widget.MaterialComponents.Button"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGmailImport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="Gmail Import"
+                android:textSize="12sp"
+                app:backgroundTint="@color/cat_flight"
+                app:icon="@drawable/ic_settings"
+                app:iconSize="14dp"
+                style="@style/Widget.MaterialComponents.Button"/>
+
         </LinearLayout>
 
         <!-- Expense list -->

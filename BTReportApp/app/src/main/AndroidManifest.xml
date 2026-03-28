@@ -29,6 +29,7 @@
         <activity android:name=".ExpenseListActivity" android:exported="false"/>
         <activity android:name=".AddExpenseActivity" android:exported="false"/>
         <activity android:name=".ScanReceiptsActivity" android:exported="false"/>
+        <activity android:name=".GmailImportActivity" android:exported="false"/>
         <activity android:name=".SettingsActivity" android:exported="false"/>
 
         <provider

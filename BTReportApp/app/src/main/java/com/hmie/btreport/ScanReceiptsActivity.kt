@@ -122,6 +122,7 @@ class ScanReceiptsActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_TRIP_ID = "trip_id"
+        const val EXTRA_INITIAL_URIS = "initial_uris"  // ArrayList<Uri> from Gmail import
     }
 
     private lateinit var b: ActivityScanReceiptsBinding
@@ -183,6 +184,13 @@ class ScanReceiptsActivity : AppCompatActivity() {
         adapter = ScanResultAdapter()
         b.rvScanResults.layoutManager = LinearLayoutManager(this)
         b.rvScanResults.adapter = adapter
+
+        // Pre-load URIs passed from Gmail import
+        @Suppress("DEPRECATION")
+        val initialUris = intent.getParcelableArrayListExtra<android.net.Uri>(EXTRA_INITIAL_URIS)
+        if (!initialUris.isNullOrEmpty()) {
+            vm.addItems(initialUris)
+        }
 
         vm.items.observe(this) { list ->
             adapter.submitList(list.toList())
