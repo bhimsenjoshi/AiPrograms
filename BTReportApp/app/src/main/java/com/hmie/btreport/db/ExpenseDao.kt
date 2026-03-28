@@ -30,4 +30,16 @@ interface ExpenseDao {
         tripId: Int, type: String, date: String, amount: Double,
         fromCity: String, toCity: String, description: String
     ): List<Expense>
+
+    /**
+     * Flight-specific duplicate check: same route on same date = same flight.
+     * Ignores amount (often 0 on boarding passes) and description (varies between scans).
+     */
+    @Query("""SELECT * FROM expenses WHERE tripId = :tripId AND type = 'FLIGHT'
+              AND date = :date
+              AND LOWER(TRIM(fromCity)) = LOWER(TRIM(:fromCity))
+              AND LOWER(TRIM(toCity))   = LOWER(TRIM(:toCity))""")
+    suspend fun findFlightDuplicates(
+        tripId: Int, date: String, fromCity: String, toCity: String
+    ): List<Expense>
 }

@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import com.hmie.btreport.adapter.ExpenseAdapter
 import com.hmie.btreport.databinding.ActivityExpenseListBinding
@@ -29,6 +30,13 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
     val expenses by lazy { db.expenseDao().getExpensesForTrip(tripId) }
     val trip by lazy {
         androidx.lifecycle.liveData { emit(db.tripDao().getTripById(tripId)) }
+    }
+
+    /** Recomputes the flight route whenever expenses change — no DB round-trip needed. */
+    val flightRoute by lazy {
+        Transformations.map(expenses) { expList ->
+            AiReceiptService.fromSettings(getApplication()).inferTripSummary(expList).route.ifBlank { "—" }
+        }
     }
 
     fun deleteExpense(expense: Expense) = viewModelScope.launch {
@@ -146,10 +154,9 @@ class ExpenseListActivity : AppCompatActivity() {
             b.tvHotelTotal.text = "₹${"%.0f".format(hotel)}"
         }
 
-        // Show flight route from trip
-        vm.trip.observe(this) { trip ->
-            val route = trip?.route?.trim()
-            b.tvFlightRoute.text = if (!route.isNullOrBlank()) route else "—"
+        // Flight route updates live as expenses are added/removed
+        vm.flightRoute.observe(this) { route ->
+            b.tvFlightRoute.text = route
         }
 
         // Scan receipts with AI

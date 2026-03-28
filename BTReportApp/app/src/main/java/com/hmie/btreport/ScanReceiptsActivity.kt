@@ -77,13 +77,15 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
         var skipped = 0
         list.filter { it.status == ScanStatus.SUCCESS && it.result != null }.forEach { item ->
             val r = item.result!!
-            // Skip if an identical expense (same type + date + amount) already exists
-            val desc = if (r.description.isNotBlank()) r.description else r.operator
-            val dupes = db.expenseDao().findDuplicates(
-                tripId, r.expenseType.name, r.date, r.amount,
-                r.fromCity, r.toCity, desc
-            )
-            if (dupes.isNotEmpty()) {
+            // Duplicate check: flights matched by route+date only (amount/description vary per scan);
+            // all other types matched by type+date+amount+route+description.
+            val isDupe = if (r.expenseType == com.hmie.btreport.model.ExpenseType.FLIGHT) {
+                db.expenseDao().findFlightDuplicates(tripId, r.date, r.fromCity, r.toCity).isNotEmpty()
+            } else {
+                val desc = if (r.description.isNotBlank()) r.description else r.operator
+                db.expenseDao().findDuplicates(tripId, r.expenseType.name, r.date, r.amount, r.fromCity, r.toCity, desc).isNotEmpty()
+            }
+            if (isDupe) {
                 skipped++
                 return@forEach
             }
@@ -147,12 +149,16 @@ class ScanReceiptsActivity : AppCompatActivity() {
     private val pickFiles = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) {
             vm.addItems(uris)
+            vm.scanAll(tripId)
         }
     }
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            pendingCameraUri?.let { vm.addItems(listOf(it)) }
+            pendingCameraUri?.let {
+                vm.addItems(listOf(it))
+                vm.scanAll(tripId)
+            }
         }
         pendingCameraUri = null
     }
@@ -197,11 +203,12 @@ class ScanReceiptsActivity : AppCompatActivity() {
         b.rvScanResults.layoutManager = LinearLayoutManager(this)
         b.rvScanResults.adapter = adapter
 
-        // Pre-load URIs passed from Gmail import
+        // Pre-load URIs passed from Gmail import — auto-scan immediately
         @Suppress("DEPRECATION")
         val initialUris = intent.getParcelableArrayListExtra<android.net.Uri>(EXTRA_INITIAL_URIS)
         if (!initialUris.isNullOrEmpty()) {
             vm.addItems(initialUris)
+            vm.scanAll(tripId)
         }
 
         vm.items.observe(this) { list ->

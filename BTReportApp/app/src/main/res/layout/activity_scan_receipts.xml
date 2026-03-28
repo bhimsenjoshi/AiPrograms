@@ -141,6 +141,7 @@
             android:textSize="13sp"
             android:maxLines="1"
             android:enabled="false"
+            android:visibility="gone"
             app:backgroundTint="@color/secondary"/>
 
         <com.google.android.material.button.MaterialButton
