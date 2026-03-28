@@ -3,6 +3,10 @@ package com.hmie.btreport.generator
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
 import com.hmie.btreport.model.Expense
 import com.hmie.btreport.model.ExpenseType
 import com.hmie.btreport.model.Trip
@@ -29,7 +33,8 @@ class WordGenerator(private val context: Context) {
     }
 
     private data class ImgEntry(val rId: String, val fileName: String, val bytes: ByteArray,
-                                val cx: Long, val cy: Long, val expenseLabel: String)
+                                val cx: Long, val cy: Long, val expenseType: ExpenseType,
+                                val expenseLabel: String)
 
     fun generate(trip: Trip, expenses: List<Expense>): File {
         val name = trip.employeeName.replace(" ", "_")
@@ -40,20 +45,27 @@ class WordGenerator(private val context: Context) {
         )
         file.parentFile?.mkdirs()
 
-        // Collect receipt images
+        // Collect receipt images — order: FLIGHT first, then CAB, then everything else
+        val ordered = expenses.sortedWith(compareBy {
+            when (it.type) {
+                ExpenseType.FLIGHT -> 0
+                ExpenseType.CAB    -> 1
+                else               -> 2
+            }
+        })
         val images = mutableListOf<ImgEntry>()
         var imgIdx = 1
-        expenses.forEach { exp ->
+        ordered.forEach { exp ->
             val path = exp.imageUri ?: return@forEach
             val imgFile = File(path)
             if (!imgFile.exists()) return@forEach
-            val bytes = loadResized(path) ?: return@forEach
+            val bytes = loadResized(path) ?: return@forEach   // handles both images and PDFs
             val (cx, cy) = imageDims(path)
             val rId = "rId${imgIdx + 2}"   // rId1=styles, rId2=settings, rId3+ = images
-            images.add(ImgEntry(rId, "image${imgIdx}.jpg", bytes, cx, cy,
+            images.add(ImgEntry(rId, "image${imgIdx}.jpg", bytes, cx, cy, exp.type,
                 "${exp.type.displayName} – ${exp.date}" +
                 (if (exp.fromCity.isNotBlank()) " (${exp.fromCity}→${exp.toCity})" else "") +
-                " Rs.${"%.0f".format(exp.amount)}"))
+                (if (exp.amount > 0) " Rs.${"%.0f".format(exp.amount)}" else "")))
             imgIdx++
         }
 
@@ -80,28 +92,54 @@ class WordGenerator(private val context: Context) {
 
     // ── Image helpers ─────────────────────────────────────────────────────────
 
+    /** Renders the file to a JPEG byte array. Handles both images and PDFs. */
     private fun loadResized(path: String): ByteArray? {
         return try {
-            val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
-            BitmapFactory.decodeFile(path, opts)
-            var sample = 1
-            while (opts.outWidth / sample > 1200 || opts.outHeight / sample > 1600) sample *= 2
-            val bmp = BitmapFactory.decodeFile(path, BitmapFactory.Options().also { it.inSampleSize = sample })
-                ?: return null
-            ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray()
+            val bmp = if (path.endsWith(".pdf", ignoreCase = true)) {
+                pdfToBitmap(path)
+            } else {
+                val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
+                BitmapFactory.decodeFile(path, opts)
+                if (opts.outWidth <= 0) return null   // not a valid image
+                var sample = 1
+                while (opts.outWidth / sample > 1200 || opts.outHeight / sample > 1600) sample *= 2
+                BitmapFactory.decodeFile(path, BitmapFactory.Options().also { it.inSampleSize = sample })
+            } ?: return null
+            ByteArrayOutputStream().also { bmp.compress(Bitmap.CompressFormat.JPEG, 85, it) }.toByteArray()
+        } catch (e: Exception) { null }
+    }
+
+    private fun pdfToBitmap(path: String): Bitmap? {
+        return try {
+            val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
+            val renderer = PdfRenderer(pfd)
+            val page = renderer.openPage(0)
+            val scale = 2   // 2x for readable resolution
+            val bmp = Bitmap.createBitmap(page.width * scale, page.height * scale, Bitmap.Config.ARGB_8888)
+            Canvas(bmp).drawColor(Color.WHITE)
+            page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            page.close(); renderer.close()
+            bmp
         } catch (e: Exception) { null }
     }
 
     private fun imageDims(path: String): Pair<Long, Long> {
-        val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
-        BitmapFactory.decodeFile(path, opts)
-        val w = opts.outWidth.coerceAtLeast(1)
-        val h = opts.outHeight.coerceAtLeast(1)
-        val cx = IMG_MAX_W_EMU
-        var cy = (cx.toDouble() * h / w).toLong()
-        if (cy > IMG_MAX_H_EMU) {
-            cy = IMG_MAX_H_EMU
+        val (w, h) = if (path.endsWith(".pdf", ignoreCase = true)) {
+            try {
+                val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
+                val renderer = PdfRenderer(pfd)
+                val page = renderer.openPage(0)
+                val pair = Pair(page.width.coerceAtLeast(1), page.height.coerceAtLeast(1))
+                page.close(); renderer.close()
+                pair
+            } catch (e: Exception) { Pair(595, 842) }  // A4 fallback
+        } else {
+            val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(path, opts)
+            Pair(opts.outWidth.coerceAtLeast(1), opts.outHeight.coerceAtLeast(1))
         }
+        val cx = IMG_MAX_W_EMU
+        val cy = minOf((cx.toDouble() * h / w).toLong(), IMG_MAX_H_EMU)
         return Pair(cx, cy)
     }
 
@@ -197,11 +235,27 @@ class WordGenerator(private val context: Context) {
         sb.append(expSummaryTable(expenses))
         sb.para("")
 
-        // ── Receipt images ──
+        // ── Receipt images — grouped: Boarding Passes → Cab bills → Other bills ──
         if (images.isNotEmpty()) {
             sb.heading("RECEIPT IMAGES")
+            var currentSection: ExpenseType? = null
             images.forEachIndexed { idx, img ->
-                sb.para("Receipt ${idx + 1}: ${img.expenseLabel}", bold = true)
+                // Emit section header when the expense type changes
+                val section = when (img.expenseType) {
+                    ExpenseType.FLIGHT -> ExpenseType.FLIGHT
+                    ExpenseType.CAB    -> ExpenseType.CAB
+                    else               -> null   // groups FOOD, HOTEL, OTHER together
+                }
+                if (section != currentSection) {
+                    val heading = when (img.expenseType) {
+                        ExpenseType.FLIGHT -> "Boarding Passes"
+                        ExpenseType.CAB    -> "Cab / Transport Bills"
+                        else               -> "Other Bills"
+                    }
+                    sb.subheading(heading)
+                    currentSection = section
+                }
+                sb.para("${img.expenseLabel}", bold = true)
                 sb.append(inlineImage(img, idx + 1))
                 sb.para("")
             }
@@ -330,6 +384,10 @@ class WordGenerator(private val context: Context) {
 
     private fun StringBuilder.heading(text: String) = appendLine(
         """<w:p><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="1565C0"/></w:rPr>
+<w:t>${text.xe()}</w:t></w:r></w:p>""")
+
+    private fun StringBuilder.subheading(text: String) = appendLine(
+        """<w:p><w:r><w:rPr><w:b/><w:sz w:val="22"/><w:color w:val="37474F"/></w:rPr>
 <w:t>${text.xe()}</w:t></w:r></w:p>""")
 
     private fun StringBuilder.labelVal(label: String, value: String) = appendLine(

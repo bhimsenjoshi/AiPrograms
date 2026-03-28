@@ -113,7 +113,7 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
         return try {
             val dir = java.io.File(context.filesDir, "receipts").also { it.mkdirs() }
             val ext = context.contentResolver.getType(uri)?.let {
-                when { it.contains("png") -> "png"; else -> "jpg" }
+                when { it.contains("pdf") -> "pdf"; it.contains("png") -> "png"; else -> "jpg" }
             } ?: "jpg"
             val dest = java.io.File(dir, "${System.currentTimeMillis()}.$ext")
             context.contentResolver.openInputStream(uri)?.use { i -> dest.outputStream().use { o -> i.copyTo(o) } }
