@@ -83,13 +83,19 @@ class AiReceiptService(private val config: Config) {
             .filter { it.type == ExpenseType.FLIGHT && it.fromCity.isNotBlank() && it.toCity.isNotBlank() }
             .sortedWith(compareBy(
                 { parseAnyDate(it.date)?.time ?: Long.MAX_VALUE },
-                { timeToMinutes(it.departureTime) }
+                { timeToMinutes(it.departureTime) },
+                { it.id }   // tiebreaker: scan order (lower id = scanned first)
             ))
 
         val route = if (flights.isNotEmpty()) {
+            // Build a chain: add fromCity of first flight, then each toCity in order.
+            // Skip consecutive duplicates so a layover city isn't repeated.
             val cities = mutableListOf(flights.first().fromCity.uppercase())
-            flights.forEach { cities.add(it.toCity.uppercase()) }
-            cities.distinct().joinToString("-")
+            flights.forEach { f ->
+                val to = f.toCity.uppercase()
+                if (cities.last() != to) cities.add(to)
+            }
+            cities.joinToString("-")
         } else ""
 
         return TripSummary(startDate, endDate, route)

@@ -447,7 +447,7 @@ $merges
                     try { dfD.format(parseDate(e.date)!!) == key } catch (ex: Exception) { false }
                 }
                 val flights = dayExp.filter { it.type == ExpenseType.FLIGHT }
-                    .sortedBy { timeToMinutes(it.departureTime) }
+                    .sortedWith(compareBy({ timeToMinutes(it.departureTime) }, { it.id }))
                 val lodging = dayExp.filter { it.type == ExpenseType.HOTEL }.sumOf { it.amount }
                 val others  = dayExp.filter { it.type == ExpenseType.CAB   }.sumOf { it.amount }
                 val da      = if (first) DA_FIRST_DAY else DA_OTHER
