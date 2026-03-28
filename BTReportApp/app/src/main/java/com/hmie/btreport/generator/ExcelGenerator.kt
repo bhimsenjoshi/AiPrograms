@@ -366,10 +366,11 @@ $merges
     }
 
     // ── Sheet 4 : DA_Tax exmp proofs ─────────────────────────────────────────
+    // Only FOOD and OTHER bills count as tax-exempt submissions.
+    // CAB expenses are pure reimbursements (sheet3) and must NOT appear here.
 
     private fun sheet4(trip: Trip, expenses: List<Expense>): String {
-        val bills = expenses.filter { it.type == ExpenseType.FOOD || it.type == ExpenseType.OTHER }
-        val cabs  = expenses.filter { it.type == ExpenseType.CAB }
+        val bills   = expenses.filter { it.type == ExpenseType.FOOD || it.type == ExpenseType.OTHER }
         val totalDA = buildDayRows(expenses).sumOf { it.da }
         val sb = StringBuilder(); val ml = mutableListOf<String>(); var r = 1
         fun m(ref: String) = ml.add(ref)
@@ -389,11 +390,6 @@ $merges
             sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,exp.receiptRef,S4)+c("C",it,exp.date,S4)+c("D",it,exp.description,S4)+cn("H",it,exp.amount)}
             billTotal += exp.amount
         }
-        if (cabs.isNotEmpty()) {
-            val cabSum = cabs.sumOf { it.amount }
-            m("D${r}:G${r}"); sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,"Cab Bills",S4)+c("C",it,"",S4)+c("D",it,"Local Travel",S4)+cn("H",it,cabSum)}
-            billTotal += cabSum
-        }
         repeat(3){m("D${r}:G${r}"); sb.row(r++,18){c("A",it,"",S4)+c("B",it,"",S4)+c("C",it,"",S4)+c("D",it,"",S4)+cn("H",it,0.0)}}
         m("A${r}:G${r}"); sb.row(r++,20){c("A",it,"Total",S8)+cn("H",it,billTotal,S7)}
         sb.row(r++,6){""}
@@ -410,12 +406,25 @@ $merges
 
     // ── Build day rows ────────────────────────────────────────────────────────
 
+    /** Try every plausible date format the AI might return */
+    private fun parseDate(s: String): Date? {
+        val fmts = listOf(
+            "dd-MMM-yyyy", "dd-MMM-yy",           // 15-Mar-2025, 15-Mar-25
+            "yyyy-MM-dd",                          // 2025-03-15  (ISO)
+            "dd/MM/yyyy", "MM/dd/yyyy",            // 15/03/2025, 03/15/2025
+            "dd-MM-yyyy",                          // 15-03-2025
+            "dd MMM yyyy", "d MMM yyyy",           // 15 Mar 2025, 5 Mar 2025
+            "MMMM d, yyyy", "d MMMM yyyy"          // March 15, 2025
+        )
+        for (f in fmts) try { return SimpleDateFormat(f, Locale.ENGLISH).parse(s) } catch (_: Exception) {}
+        return null
+    }
+
     private fun buildDayRows(expenses: List<Expense>): List<DayRow> {
         if (expenses.isEmpty()) return emptyList()
-        val dfP = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
-        val dfD = SimpleDateFormat("dd-MMM-yy",   Locale.ENGLISH)
+        val dfD = SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)
 
-        val dates = expenses.mapNotNull { try { dfP.parse(it.date) } catch (e: Exception) { null } }
+        val dates = expenses.mapNotNull { parseDate(it.date) }
             .distinctBy { dfD.format(it) }.sortedBy { it }
         if (dates.isEmpty()) return emptyList()
 
@@ -435,7 +444,7 @@ $merges
                 val now = cal.time.clone() as Date
                 val key = dfD.format(now)
                 val dayExp = expenses.filter { e ->
-                    try { dfD.format(dfP.parse(e.date)!!) == key } catch (ex: Exception) { false }
+                    try { dfD.format(parseDate(e.date)!!) == key } catch (ex: Exception) { false }
                 }
                 val flight  = dayExp.firstOrNull { it.type == ExpenseType.FLIGHT }
                 val lodging = dayExp.filter { it.type == ExpenseType.HOTEL }.sumOf { it.amount }
