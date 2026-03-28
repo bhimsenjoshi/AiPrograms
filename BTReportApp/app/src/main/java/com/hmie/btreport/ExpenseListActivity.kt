@@ -10,7 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.hmie.btreport.adapter.ExpenseAdapter
 import com.hmie.btreport.databinding.ActivityExpenseListBinding
@@ -34,7 +34,7 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
 
     /** Recomputes the flight route whenever expenses change — no DB round-trip needed. */
     val flightRoute by lazy {
-        Transformations.map(expenses) { expList ->
+        expenses.map { expList ->
             AiReceiptService.fromSettings(getApplication()).inferTripSummary(expList).route.ifBlank { "—" }
         }
     }
