@@ -92,18 +92,6 @@
                         android:layout_marginTop="2dp"/>
 
                 </LinearLayout>
-
-                <!-- Draft chip -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="DRAFT"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/on_surface_variant"
-                    android:background="@drawable/chip_gray_bg"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp"/>
             </LinearLayout>
 
             <!-- Action buttons -->

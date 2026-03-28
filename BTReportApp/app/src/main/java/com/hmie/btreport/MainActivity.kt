@@ -69,5 +69,18 @@ class MainActivity : AppCompatActivity() {
         b.navSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        b.btnSupport.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("About HMIE Expense")
+                .setMessage(
+                    "Version: 1.0\n\n" +
+                    "Developed by: Bhimsen Joshi\n" +
+                    "Contact: bhimsen.joshi@gmail.com\n\n" +
+                    "Release Date: 28 March 2026\n\n" +
+                    "© 2026 HMIE. All rights reserved."
+                )
+                .setPositiveButton("OK", null)
+                .show()
+        }
     }
 }
