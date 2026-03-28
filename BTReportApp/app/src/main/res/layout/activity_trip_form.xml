@@ -10,7 +10,8 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar" android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary" app:titleTextColor="@android:color/white"/>
+            android:background="@color/primary" app:titleTextColor="@android:color/white"
+            app:navigationIconTint="@android:color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
