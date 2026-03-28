@@ -93,6 +93,7 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
                     tripId = tripId,
                     type = r.expenseType,
                     date = r.date,
+                    departureTime = r.departureTime,
                     description = if (r.description.isNotBlank()) r.description else r.operator,
                     fromCity = r.fromCity,
                     toCity = r.toCity,

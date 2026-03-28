@@ -19,13 +19,14 @@ data class Expense(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val tripId: Int,
     val type: ExpenseType,
-    val date: String = "",         // "dd-MMM-yyyy"
+    val date: String = "",           // "dd-MMM-yyyy"
+    val departureTime: String = "",  // "HH:mm" 24-hour, blank if not applicable
     val description: String = "",
     val fromCity: String = "",
     val toCity: String = "",
     val receiptRef: String = "",
     val amount: Double = 0.0,
-    val imageUri: String? = null   // path to locally saved receipt image
+    val imageUri: String? = null     // path to locally saved receipt image
 )
 
 enum class ExpenseType(val displayName: String) {

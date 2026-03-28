@@ -446,14 +446,36 @@ $merges
                 val dayExp = expenses.filter { e ->
                     try { dfD.format(parseDate(e.date)!!) == key } catch (ex: Exception) { false }
                 }
-                val flight  = dayExp.firstOrNull { it.type == ExpenseType.FLIGHT }
+                val flights = dayExp.filter { it.type == ExpenseType.FLIGHT }
+                    .sortedBy { timeToMinutes(it.departureTime) }
                 val lodging = dayExp.filter { it.type == ExpenseType.HOTEL }.sumOf { it.amount }
                 val others  = dayExp.filter { it.type == ExpenseType.CAB   }.sumOf { it.amount }
-                result.add(DayRow(key, flight?.fromCity ?: "", flight?.toCity ?: "",
-                    if (first) DA_FIRST_DAY else DA_OTHER, lodging, others))
+                val da      = if (first) DA_FIRST_DAY else DA_OTHER
+
+                if (flights.isEmpty()) {
+                    result.add(DayRow(key, "", "", da, lodging, others))
+                } else {
+                    // One row per flight on this day; DA/lodging/others only on the first row
+                    flights.forEachIndexed { idx, flight ->
+                        result.add(DayRow(
+                            key, flight.fromCity, flight.toCity,
+                            if (idx == 0) da      else 0.0,
+                            if (idx == 0) lodging else 0.0,
+                            if (idx == 0) others  else 0.0
+                        ))
+                    }
+                }
                 cal.add(Calendar.DAY_OF_MONTH, 1); first = false
             }
         }
         return result
+    }
+
+    private fun timeToMinutes(t: String): Int {
+        if (t.isBlank()) return 0
+        return try {
+            val parts = t.trim().split(":")
+            parts[0].toInt() * 60 + parts[1].toInt()
+        } catch (_: Exception) { 0 }
     }
 }

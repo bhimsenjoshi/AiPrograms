@@ -75,16 +75,16 @@ class AiReceiptService(private val config: Config) {
         if (expenses.isEmpty()) return TripSummary("", "", "")
         val sdf = java.text.SimpleDateFormat("dd-MMM-yyyy", java.util.Locale.ENGLISH)
 
-        val sortedDates = expenses.mapNotNull {
-            try { sdf.parse(it.date) } catch (e: Exception) { null }
-        }.sorted()
-
+        val sortedDates = expenses.mapNotNull { parseAnyDate(it.date) }.sorted()
         val startDate = sortedDates.firstOrNull()?.let { sdf.format(it) } ?: ""
-        val endDate = sortedDates.lastOrNull()?.let { sdf.format(it) } ?: ""
+        val endDate   = sortedDates.lastOrNull()?.let  { sdf.format(it) } ?: ""
 
         val flights = expenses
             .filter { it.type == ExpenseType.FLIGHT && it.fromCity.isNotBlank() && it.toCity.isNotBlank() }
-            .sortedWith(compareBy { try { sdf.parse(it.date)?.time ?: 0L } catch (e: Exception) { 0L } })
+            .sortedWith(compareBy(
+                { parseAnyDate(it.date)?.time ?: Long.MAX_VALUE },
+                { timeToMinutes(it.departureTime) }
+            ))
 
         val route = if (flights.isNotEmpty()) {
             val cities = mutableListOf(flights.first().fromCity.uppercase())
@@ -96,6 +96,32 @@ class AiReceiptService(private val config: Config) {
     }
 
     data class TripSummary(val startDate: String, val endDate: String, val route: String)
+
+    // ── Date / time helpers ───────────────────────────────────────────────────
+
+    private fun parseAnyDate(s: String): java.util.Date? {
+        val fmts = listOf(
+            "dd-MMM-yyyy", "dd-MMM-yy",
+            "yyyy-MM-dd",
+            "dd/MM/yyyy", "MM/dd/yyyy",
+            "dd-MM-yyyy",
+            "dd MMM yyyy", "d MMM yyyy",
+            "MMMM d, yyyy", "d MMMM yyyy"
+        )
+        for (f in fmts) try {
+            return java.text.SimpleDateFormat(f, java.util.Locale.ENGLISH).parse(s)
+        } catch (_: Exception) {}
+        return null
+    }
+
+    /** Returns departure time in minutes since midnight; 0 if blank/unparseable (sorts first). */
+    private fun timeToMinutes(t: String): Int {
+        if (t.isBlank()) return 0
+        return try {
+            val parts = t.trim().split(":")
+            parts[0].toInt() * 60 + parts[1].toInt()
+        } catch (_: Exception) { 0 }
+    }
 
     // ── Groq (OpenAI-compatible, free) ───────────────────────────────────────
 
@@ -314,6 +340,7 @@ class AiReceiptService(private val config: Config) {
             ReceiptData(
                 expenseType = type,
                 date = json.optString("date", ""),
+                departureTime = json.optString("departure_time", ""),
                 amount = json.optDouble("amount", 0.0),
                 description = json.optString("description", json.optString("operator", "")),
                 fromCity = json.optString("from_city", "").uppercase(),
@@ -335,6 +362,7 @@ Return ONLY a JSON object (no markdown, no extra text):
 {
   "expense_type": "FLIGHT" or "CAB" or "FOOD" or "HOTEL" or "OTHER",
   "date": "dd-MMM-yyyy e.g. 22-Mar-2026",
+  "departure_time": "HH:mm 24-hour departure/boarding time e.g. 06:20, blank string if not a flight or not visible",
   "amount": total amount paid as a number in INR,
   "description": "short description e.g. IX-2934 HYD-BLR or Chai Point BLR Airport",
   "from_city": "departure or pickup IATA city code e.g. HYD",
@@ -345,6 +373,7 @@ Return ONLY a JSON object (no markdown, no extra text):
 
 Rules:
 - Boarding pass → FLIGHT. IATA codes: HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai.
+- For flights: departure_time is the scheduled departure time printed on the boarding pass (24-hour HH:mm).
 - Cab receipt (Rapido/QuickRide/Ola/Uber/auto) → CAB.
 - Restaurant/cafe/food court → FOOD.
 - Hotel/lodge → HOTEL.
