@@ -256,7 +256,10 @@ class GmailImportActivity : AppCompatActivity() {
             is GmailUiState.Loading -> {
                 b.groupContent.visibility = View.VISIBLE
                 b.progressBar.visibility = View.VISIBLE
-                b.tvStatus.text = "Searching Gmail…"
+                b.tvStatus.text = if (startDate.isNotBlank() && endDate.isNotBlank())
+                    "Fetching all emails from $startDate to $endDate…"
+                else
+                    "Searching Gmail for expense-related emails…"
                 b.btnFetchEmails.isEnabled = false
                 b.btnImportSelected.isEnabled = false
                 b.btnSelectAll.visibility = View.GONE
@@ -269,10 +272,18 @@ class GmailImportActivity : AppCompatActivity() {
                 b.btnFetchEmails.isEnabled = true
                 emailAdapter.submitList(state.items)
                 val count = state.items.size
-                b.tvStatus.text = if (count == 0)
-                    "No expense-related emails found in this date range. Try fetching without dates set."
-                else
-                    "$count email(s) found. Tick the ones to import, then tap 'Scan Selected'."
+                b.tvStatus.text = when {
+                    count == 0 && startDate.isNotBlank() ->
+                        "No emails found between $startDate and $endDate. " +
+                        "Make sure your trip dates are set correctly on the trip."
+                    count == 0 ->
+                        "No expense-related emails found. Set trip start/end dates for a broader search."
+                    startDate.isNotBlank() ->
+                        "$count emails found between $startDate and $endDate. " +
+                        "Select the ones with receipts/tickets and tap 'Scan Selected'."
+                    else ->
+                        "$count emails found. Select the ones to scan."
+                }
                 b.btnImportSelected.isEnabled = count > 0
                 b.btnSelectAll.visibility = if (count > 1) View.VISIBLE else View.GONE
                 allSelected = true

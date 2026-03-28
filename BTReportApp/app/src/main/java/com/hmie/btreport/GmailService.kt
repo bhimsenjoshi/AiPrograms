@@ -86,7 +86,7 @@ class GmailService(private val context: Context) {
     private fun listMessageIds(token: String, query: String): List<String> {
         val encoded = java.net.URLEncoder.encode(query, "UTF-8")
         val req = Request.Builder()
-            .url("$BASE/messages?q=$encoded&maxResults=50")
+            .url("$BASE/messages?q=$encoded&maxResults=100")
             .addHeader("Authorization", "Bearer $token")
             .build()
         val body = client.newCall(req).execute().use { it.body?.string() ?: return emptyList() }
@@ -142,7 +142,7 @@ class GmailService(private val context: Context) {
         }
     }
 
-    private fun buildQuery(startDate: String, endDate: String): String {
+    fun buildQuery(startDate: String, endDate: String): String {
         val fmt = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
         val cal = Calendar.getInstance()
 
@@ -157,13 +157,23 @@ class GmailService(private val context: Context) {
             "${cal.get(Calendar.YEAR)}/${cal.get(Calendar.MONTH) + 1}/${cal.get(Calendar.DAY_OF_MONTH)}"
         } catch (e: Exception) { "" }
 
-        val dateFilter = if (start.isNotBlank() && end.isNotBlank()) "after:$start before:$end " else ""
-
-        return "${dateFilter}(" +
-            "has:attachment OR subject:ticket OR subject:boarding OR " +
-            "subject:receipt OR subject:invoice OR subject:bill OR subject:confirmation OR " +
-            "from:irctc.co.in OR from:makemytrip OR from:goibibo OR from:cleartrip OR " +
-            "from:olacabs OR from:uber.com OR from:rapido OR " +
-            "from:goindigo.in OR from:spicejet.com OR from:airindia.in OR from:airvistara.com)"
+        return if (start.isNotBlank() && end.isNotBlank()) {
+            // Date range is known — fetch ALL emails in that period.
+            // No keyword restriction so nothing is missed; user picks what's relevant.
+            "after:$start before:$end"
+        } else {
+            // No dates — broad keyword search for expense-related emails
+            "(has:attachment OR subject:ticket OR subject:boarding pass OR " +
+            "subject:receipt OR subject:invoice OR subject:bill OR " +
+            "subject:booking confirmation OR subject:itinerary OR subject:payment OR " +
+            "subject:e-ticket OR subject:order confirmation OR " +
+            "from:irctc.co.in OR from:makemytrip.com OR from:goibibo.com OR " +
+            "from:cleartrip.com OR from:yatra.com OR from:ixigo.com OR " +
+            "from:olacabs.com OR from:uber.com OR from:rapido.bike OR " +
+            "from:goindigo.in OR from:spicejet.com OR from:airindia.in OR " +
+            "from:airvistara.com OR from:akasaair.com OR " +
+            "from:oyorooms.com OR from:treebo.com OR from:fabhotels.com OR " +
+            "from:swiggy.in OR from:zomato.com)"
+        }
     }
 }
