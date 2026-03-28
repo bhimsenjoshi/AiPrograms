@@ -38,7 +38,11 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
         var removed = 0
         // Sort by id ascending so we keep the earliest entry
         all.sortedBy { it.id }.forEach { exp ->
-            val key = "${exp.type.name}|${exp.date}|${"%.2f".format(exp.amount)}"
+            // Include route and description so two different journeys on the same
+            // date (e.g. two flights on 23rd) are never wrongly merged
+            val key = "${exp.type.name}|${exp.date}|${"%.2f".format(exp.amount)}" +
+                      "|${exp.fromCity.trim().lowercase()}|${exp.toCity.trim().lowercase()}" +
+                      "|${exp.description.trim().lowercase()}"
             if (!seen.add(key)) {
                 db.expenseDao().deleteExpense(exp)
                 removed++

@@ -78,7 +78,11 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
         list.filter { it.status == ScanStatus.SUCCESS && it.result != null }.forEach { item ->
             val r = item.result!!
             // Skip if an identical expense (same type + date + amount) already exists
-            val dupes = db.expenseDao().findDuplicates(tripId, r.expenseType.name, r.date, r.amount)
+            val desc = if (r.description.isNotBlank()) r.description else r.operator
+            val dupes = db.expenseDao().findDuplicates(
+                tripId, r.expenseType.name, r.date, r.amount,
+                r.fromCity, r.toCity, desc
+            )
             if (dupes.isNotEmpty()) {
                 skipped++
                 return@forEach
