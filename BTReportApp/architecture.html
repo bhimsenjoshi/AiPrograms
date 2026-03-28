@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>HMIE Expense – App Architecture</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1729; color: #e8eaf6; overflow: hidden; }
+
+  #header { padding: 14px 20px; background: #1a237e; display: flex; align-items: center; gap: 16px; }
+  #header h1 { font-size: 17px; font-weight: 700; color: #fff; }
+  #header span { font-size: 11px; color: #9fa8da; }
+
+  #legend { position: absolute; top: 62px; right: 16px; background: #1e2a4a; border-radius: 10px;
+            padding: 12px 16px; font-size: 11px; z-index: 10; line-height: 2; }
+  #legend div { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  #tooltip { position: absolute; background: #1e2a4a; border: 1px solid #3f51b5;
+             border-radius: 10px; padding: 12px 16px; font-size: 12px; pointer-events: none;
+             max-width: 280px; line-height: 1.7; z-index: 20; display: none; }
+  #tooltip h3 { font-size: 13px; color: #7986cb; margin-bottom: 4px; }
+  #tooltip .tag { display: inline-block; background: #283593; border-radius: 4px;
+                  padding: 1px 6px; font-size: 10px; margin: 2px 2px 0 0; color: #9fa8da; }
+
+  #controls { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+              display: flex; gap: 8px; }
+  #controls button { background: #1a237e; border: 1px solid #3f51b5; color: #e8eaf6;
+                     padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; }
+  #controls button:hover { background: #283593; }
+
+  svg { width: 100%; cursor: grab; }
+  svg:active { cursor: grabbing; }
+
+  .link { stroke-opacity: 0.55; fill: none; stroke-width: 1.5; }
+  .link.data   { stroke: #42a5f5; stroke-dasharray: 6 3; }
+  .link.nav    { stroke: #66bb6a; }
+  .link.result { stroke: #ffa726; stroke-dasharray: 4 3; }
+  .link.calls  { stroke: #ab47bc; }
+
+  .node-group { cursor: pointer; }
+  .node-rect { rx: 10; ry: 10; stroke-width: 2; }
+  .node-label { fill: #fff; font-size: 11px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .node-sub   { fill: #9fa8da; font-size: 9px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+
+  .node-group:hover .node-rect { filter: brightness(1.3); }
+  .node-group.selected .node-rect { stroke: #fff !important; stroke-width: 3; }
+</style>
+</head>
+<body>
+<div id="header">
+  <div style="background:#fff;color:#1a237e;font-weight:900;font-size:18px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">H</div>
+  <div>
+    <h1>HMIE Expense – App Architecture</h1>
+    <span>Scroll to zoom · Drag to pan · Click node for details</span>
+  </div>
+</div>
+
+<div id="legend">
+  <div><span class="dot" style="background:#66bb6a"></span> Navigate (startActivity)</div>
+  <div><span class="dot" style="background:#42a5f5;opacity:.7"></span> LiveData observe</div>
+  <div><span class="dot" style="background:#ab47bc"></span> Service call</div>
+  <div><span class="dot" style="background:#ffa726;opacity:.7"></span> Activity result</div>
+</div>
+
+<div id="tooltip"></div>
+<svg id="graph"></svg>
+
+<div id="controls">
+  <button onclick="resetZoom()">⟳ Reset</button>
+  <button onclick="filterLayer('all')">All</button>
+  <button onclick="filterLayer('screens')">Screens only</button>
+  <button onclick="filterLayer('data')">Data layer</button>
+</div>
+
+<script>
+const W = window.innerWidth, H = window.innerHeight - 54;
+
+const COLORS = {
+  screen:    '#1a237e',
+  viewmodel: '#1565c0',
+  service:   '#4a148c',
+  adapter:   '#1b5e20',
+  generator: '#bf360c',
+  model:     '#37474f',
+  dao:       '#004d40',
+  db:        '#006064',
+};
+
+const NODES = [
+  // Screens
+  { id:'MainActivity',         label:'Main\nActivity',        sub:'Trip list',              color:COLORS.screen,    layer:'screens', x:320, y:300,
+    desc:'Entry point. Lists all Business Trips.',
+    details:['Observes: MainViewModel.trips (LiveData)','Starts: TripFormActivity (new/edit)','Starts: ExpenseListActivity (open trip)','Starts: SettingsActivity'],
+    tags:['Activity','MVVM'] },
+  { id:'TripFormActivity',      label:'Trip Form\nActivity',   sub:'Create / Edit trip',     color:COLORS.screen,    layer:'screens', x:120, y:180,
+    desc:'Create or edit a Business Trip record. Auto-detects dates & route from scanned expenses.',
+    details:['Observes: TripFormViewModel','Calls: AiReceiptService.inferTripSummary()','Saves via: TripDao'],
+    tags:['Activity'] },
+  { id:'ExpenseListActivity',   label:'Expense List\nActivity',sub:'Trip expenses',          color:COLORS.screen,    layer:'screens', x:560, y:300,
+    desc:'Shows all expenses for a trip with category totals and flight route card.',
+    details:['Observes: expenses (LiveData)','Observes: flightRoute (derived LiveData)','Starts: ScanReceiptsActivity','Starts: GmailImportActivity','Starts: AddExpenseActivity','Generates Excel + Word docs'],
+    tags:['Activity','MVVM'] },
+  { id:'ScanReceiptsActivity',  label:'Scan Receipts\nActivity',sub:'AI OCR',               color:COLORS.screen,    layer:'screens', x:800, y:160,
+    desc:'Camera / file picker → AI scanning → save expenses. Auto-scans on file load.',
+    details:['Camera via TakePicture contract','File picker: OpenMultipleDocuments','Calls: AiReceiptService.analyzeReceipt()','Auto-triggers scanAll() on add','Duplicate check before insert'],
+    tags:['Activity','AI','Camera'] },
+  { id:'GmailImportActivity',   label:'Gmail Import\nActivity',sub:'OAuth + fetch emails',  color:COLORS.screen,    layer:'screens', x:800, y:420,
+    desc:'Google Sign-In → fetch expense-related emails → download attachments → hand off to Scan.',
+    details:['GoogleSignIn OAuth','GmailService.fetchExpenseEmails()','Date-range + keyword query','Downloads attachments as PDF/image','Launches ScanReceiptsActivity with URIs'],
+    tags:['Activity','Gmail','OAuth'] },
+  { id:'AddExpenseActivity',    label:'Add Expense\nActivity', sub:'Manual entry',          color:COLORS.screen,    layer:'screens', x:560, y:500,
+    desc:'Manual expense entry form. Includes departure time field for flights.',
+    details:['Fields: type, date, departure time, cities, amount','Edit existing or create new','Saves via AddExpenseViewModel'],
+    tags:['Activity'] },
+  { id:'SettingsActivity',      label:'Settings\nActivity',    sub:'AI config + defaults',  color:COLORS.screen,    layer:'screens', x:120, y:420,
+    desc:'Configure AI provider, API key, Ollama endpoint, and employee defaults.',
+    details:['Providers: Groq · Gemini · Ollama · Claude','Stores in SharedPreferences','Defaults pre-fill new Trip Form'],
+    tags:['Activity','Config'] },
+
+  // ViewModels
+  { id:'MainViewModel',         label:'Main\nViewModel',      sub:'trips LiveData',         color:COLORS.viewmodel, layer:'data', x:320, y:170,
+    desc:'Holds trips LiveData from Room. Handles trip deletion.',
+    details:['trips = TripDao.getAllTrips()','deleteTrip(trip)'],
+    tags:['ViewModel','LiveData'] },
+  { id:'ExpenseListViewModel',  label:'Expense List\nViewModel',sub:'expenses + route',     color:COLORS.viewmodel, layer:'data', x:560, y:150,
+    desc:'Holds expenses LiveData and derives live flightRoute via map transform.',
+    details:['expenses = ExpenseDao.getExpensesForTrip()','flightRoute = expenses.map { inferTripSummary }','autoUpdateTripDetails()','generateDocs() → ExcelGenerator + WordGenerator','removeDuplicates()'],
+    tags:['ViewModel','LiveData','Derived'] },
+  { id:'ScanReceiptsViewModel', label:'Scan\nViewModel',      sub:'items MutableLiveData',  color:COLORS.viewmodel, layer:'data', x:960, y:160,
+    desc:'Manages list of scan items. Drives the per-item PENDING→SCANNING→SUCCESS/ERROR flow.',
+    details:['items: MutableLiveData<List<ScanItem>>','addItems(uris)','scanAll(tripId)','saveAllExpenses(tripId)'],
+    tags:['ViewModel','LiveData'] },
+  { id:'GmailImportViewModel',  label:'Gmail\nViewModel',     sub:'state MutableLiveData',  color:COLORS.viewmodel, layer:'data', x:960, y:420,
+    desc:'State machine for Gmail import: Idle → SignedOut → Loading → EmailList → Error.',
+    details:['state: MutableLiveData<GmailUiState>','checkSignIn()','fetchEmails()','downloadAndSave()'],
+    tags:['ViewModel','StateMachine'] },
+
+  // Services
+  { id:'AiReceiptService',      label:'AI Receipt\nService',  sub:'Groq·Gemini·Ollama·Claude',color:COLORS.service,layer:'data', x:1120, y:60,
+    desc:'Multi-provider AI receipt OCR. Converts PDF to image, compresses, calls API, parses JSON.',
+    details:['analyzeReceipt(uri) → ReceiptData','inferTripSummary(expenses) → TripSummary','Providers: Groq / Gemini / Ollama / Claude','PDF first-page render via PdfRenderer','RECEIPT_PROMPT: extracts type/date/time/cities/amount'],
+    tags:['Service','AI','Network'] },
+  { id:'GmailService',          label:'Gmail\nService',       sub:'REST API',               color:COLORS.service,   layer:'data', x:1120, y:360,
+    desc:'Handles Google OAuth token, Gmail message list/get API, attachment download.',
+    details:['getAccessToken() → GoogleAuthUtil','fetchExpenseEmails() → List<GmailEmailItem>','buildQuery(): date range + keywords','collectAttachments(): image/pdf only','downloadAttachment()'],
+    tags:['Service','Gmail','OAuth'] },
+
+  // Generators
+  { id:'ExcelGenerator',        label:'Excel\nGenerator',     sub:'4-sheet XLSX',           color:COLORS.generator, layer:'data', x:680, y:600,
+    desc:'Generates XLSX with 4 sheets: DBT Page_A, Total Page B, Other Exp, DA Tax Exempt.',
+    details:['Direct ZIP+XML (no POI library)','Sheet 1: Daily DA rows per flight','Sheet 3: Cab reimbursements','Sheet 4: Food/Other for tax exemption','Multi-format date parser'],
+    tags:['Generator','XLSX'] },
+  { id:'WordGenerator',         label:'Word\nGenerator',      sub:'DOCX with images',       color:COLORS.generator, layer:'data', x:500, y:600,
+    desc:'Generates DOCX with trip summary, itinerary table, and receipt images grouped by type.',
+    details:['Direct ZIP+OOXML (no POI library)','Images: Boarding Passes → Cab → Other','PDF receipts rendered via PdfRenderer','Section headings per group'],
+    tags:['Generator','DOCX'] },
+
+  // Adapters
+  { id:'TripAdapter',           label:'Trip\nAdapter',        sub:'RecyclerView',           color:COLORS.adapter,   layer:'screens', x:320, y:420,
+    desc:'Displays trip cards with route, employee name, dates, Open/Delete buttons.',
+    details:['Callbacks: onOpen, onEdit, onDelete','DiffUtil for efficient updates'],
+    tags:['Adapter'] },
+  { id:'ExpenseAdapter',        label:'Expense\nAdapter',     sub:'RecyclerView',           color:COLORS.adapter,   layer:'screens', x:760, y:300,
+    desc:'Displays expense items with emoji icon, receipt thumbnail, amount, and Edit/Delete.',
+    details:['Shows receipt image thumbnail if available','Emoji by ExpenseType','Callbacks: onEdit, onDelete'],
+    tags:['Adapter'] },
+  { id:'ScanResultAdapter',     label:'Scan Result\nAdapter', sub:'RecyclerView',           color:COLORS.adapter,   layer:'screens', x:1080, y:220,
+    desc:'Displays per-receipt scan cards: image preview, status badge, extracted data fields.',
+    details:['PENDING/SCANNING/SUCCESS/ERROR states','Shows: vendor, amount, date, route + dep time','NO DEP TIME shown if missing'],
+    tags:['Adapter'] },
+  { id:'GmailEmailAdapter',     label:'Gmail Email\nAdapter', sub:'RecyclerView',           color:COLORS.adapter,   layer:'screens', x:1080, y:500,
+    desc:'Displays email list with checkbox, subject, sender, date, attachment count chip.',
+    details:['MutableList (not ListAdapter)','getSelectedItems()'],
+    tags:['Adapter'] },
+
+  // DB
+  { id:'AppDatabase',           label:'App\nDatabase',        sub:'Room v3',                color:COLORS.db,        layer:'data', x:200, y:600,
+    desc:'Room database singleton with migrations v1→v2→v3.',
+    details:['v1→v2: added imageUri column','v2→v3: added departureTime column','Tables: trips, expenses'],
+    tags:['Room','SQLite'] },
+  { id:'TripDao',               label:'Trip\nDAO',            sub:'CRUD trips',             color:COLORS.dao,       layer:'data', x:60,  y:500,
+    desc:'getAllTrips(), getTripById(), insertTrip(), updateTrip(), deleteTrip()',
+    details:['getAllTrips() → LiveData<List<Trip>>','getTripById() → suspend'],
+    tags:['DAO','Room'] },
+  { id:'ExpenseDao',            label:'Expense\nDAO',         sub:'CRUD expenses',          color:COLORS.dao,       layer:'data', x:60,  y:620,
+    desc:'getExpensesForTrip(), insertExpense(), findDuplicates(), findFlightDuplicates()',
+    details:['getExpensesForTrip() → LiveData','findFlightDuplicates(date, from, to)','findDuplicates(type, date, amount, ...)'],
+    tags:['DAO','Room'] },
+];
+
+const LINKS = [
+  // MainActivity nav
+  { s:'MainActivity',        t:'TripFormActivity',        type:'nav',    label:'new/edit trip' },
+  { s:'MainActivity',        t:'ExpenseListActivity',     type:'nav',    label:'open trip' },
+  { s:'MainActivity',        t:'SettingsActivity',        type:'nav',    label:'settings' },
+  { s:'MainActivity',        t:'MainViewModel',           type:'data',   label:'observes trips' },
+  { s:'MainViewModel',       t:'TripDao',                 type:'calls',  label:'getAllTrips()' },
+  { s:'MainViewModel',       t:'TripAdapter',             type:'calls',  label:'submitList()' },
+
+  // TripFormActivity
+  { s:'TripFormActivity',    t:'AiReceiptService',        type:'calls',  label:'inferTripSummary()' },
+  { s:'TripFormActivity',    t:'TripDao',                 type:'calls',  label:'save / load' },
+
+  // ExpenseListActivity
+  { s:'ExpenseListActivity', t:'ExpenseListViewModel',    type:'data',   label:'observes expenses\n+ flightRoute' },
+  { s:'ExpenseListActivity', t:'ScanReceiptsActivity',    type:'nav',    label:'scan receipts' },
+  { s:'ExpenseListActivity', t:'GmailImportActivity',     type:'nav',    label:'import from gmail' },
+  { s:'ExpenseListActivity', t:'AddExpenseActivity',      type:'nav',    label:'add / edit expense' },
+  { s:'ExpenseListViewModel',t:'ExpenseDao',              type:'calls',  label:'getExpenses()' },
+  { s:'ExpenseListViewModel',t:'ExcelGenerator',          type:'calls',  label:'generate()' },
+  { s:'ExpenseListViewModel',t:'WordGenerator',           type:'calls',  label:'generate()' },
+  { s:'ExpenseListViewModel',t:'ExpenseAdapter',          type:'calls',  label:'submitList()' },
+  { s:'ExpenseListViewModel',t:'AiReceiptService',        type:'calls',  label:'inferTripSummary()' },
+
+  // Scan
+  { s:'ScanReceiptsActivity',t:'ScanReceiptsViewModel',   type:'data',   label:'observes items' },
+  { s:'ScanReceiptsActivity',t:'ScanResultAdapter',       type:'calls',  label:'submitList()' },
+  { s:'ScanReceiptsActivity',t:'ExpenseListActivity',     type:'result', label:'RESULT_OK' },
+  { s:'ScanReceiptsViewModel',t:'AiReceiptService',       type:'calls',  label:'analyzeReceipt()' },
+  { s:'ScanReceiptsViewModel',t:'ExpenseDao',             type:'calls',  label:'insert / dedup' },
+
+  // Gmail
+  { s:'GmailImportActivity', t:'GmailImportViewModel',    type:'data',   label:'observes state' },
+  { s:'GmailImportActivity', t:'GmailEmailAdapter',       type:'calls',  label:'setItems()' },
+  { s:'GmailImportActivity', t:'ScanReceiptsActivity',    type:'nav',    label:'with URIs' },
+  { s:'GmailImportViewModel',t:'GmailService',            type:'calls',  label:'fetchEmails()' },
+
+  // DB
+  { s:'AppDatabase',         t:'TripDao',                 type:'calls',  label:'provides' },
+  { s:'AppDatabase',         t:'ExpenseDao',              type:'calls',  label:'provides' },
+  { s:'TripFormActivity',    t:'AppDatabase',             type:'calls',  label:'getDatabase()' },
+];
+
+// ── D3 setup ──────────────────────────────────────────────────────────────────
+const svg = d3.select('#svg').attr = null;
+const root = d3.select('#graph')
+  .attr('width', W).attr('height', H - 54)
+  .call(d3.zoom().scaleExtent([0.3, 2.5]).on('zoom', e => g.attr('transform', e.transform)));
+
+const g = root.append('g');
+
+// Arrow markers
+const defs = root.append('defs');
+['nav','data','result','calls'].forEach(type => {
+  const col = { nav:'#66bb6a', data:'#42a5f5', result:'#ffa726', calls:'#ab47bc' }[type];
+  defs.append('marker').attr('id','arrow-'+type)
+    .attr('viewBox','0 -4 8 8').attr('refX',8).attr('refY',0)
+    .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+    .append('path').attr('d','M0,-4L8,0L0,4').attr('fill',col);
+});
+
+// Node dimensions
+const NW = 100, NH = 48;
+
+// Draw links
+const linkG = g.append('g');
+linkG.selectAll('path').data(LINKS).enter().append('path')
+  .attr('class', d => 'link ' + d.type)
+  .attr('marker-end', d => 'url(#arrow-'+d.type+')')
+  .attr('d', d => {
+    const s = NODES.find(n => n.id === d.s);
+    const t = NODES.find(n => n.id === d.t);
+    if (!s || !t) return '';
+    const dx = t.x - s.x, dy = t.y - s.y;
+    const mx = (s.x + t.x) / 2, my = (s.y + t.y) / 2;
+    return `M${s.x},${s.y} Q${mx+dy*0.12},${my-dx*0.12} ${t.x},${t.y}`;
+  });
+
+// Draw nodes
+const nodeG = g.append('g');
+const nodeEnter = nodeG.selectAll('g').data(NODES).enter()
+  .append('g').attr('class','node-group')
+  .attr('transform', d => `translate(${d.x},${d.y})`)
+  .call(d3.drag()
+    .on('start', function(event, d) { d3.select(this).raise(); })
+    .on('drag', function(event, d) {
+      d.x = event.x; d.y = event.y;
+      d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
+      linkG.selectAll('path').attr('d', lk => {
+        const s = NODES.find(n => n.id === lk.s);
+        const t = NODES.find(n => n.id === lk.t);
+        if (!s || !t) return '';
+        const dx = t.x - s.x, dy = t.y - s.y;
+        const mx = (s.x + t.x) / 2, my = (s.y + t.y) / 2;
+        return `M${s.x},${s.y} Q${mx+dy*0.12},${my-dx*0.12} ${t.x},${t.y}`;
+      });
+    })
+  )
+  .on('click', showTooltip)
+  .on('mouseleave', () => {});
+
+nodeEnter.append('rect')
+  .attr('class','node-rect')
+  .attr('x', -NW/2).attr('y', -NH/2)
+  .attr('width', NW).attr('height', NH)
+  .attr('fill', d => d.color)
+  .attr('stroke', d => d3.color(d.color).brighter(0.8));
+
+nodeEnter.each(function(d) {
+  const lines = d.label.split('\n');
+  const el = d3.select(this);
+  if (lines.length === 1) {
+    el.append('text').attr('class','node-label').attr('y', 0).text(lines[0]);
+  } else {
+    el.append('text').attr('class','node-label').attr('y', -8).text(lines[0]);
+    el.append('text').attr('class','node-label').attr('y', 8).text(lines[1]);
+  }
+  el.append('text').attr('class','node-sub').attr('y', NH/2 - 8).text(d.sub);
+});
+
+// Tooltip
+let selected = null;
+function showTooltip(event, d) {
+  if (selected) d3.select(selected).classed('selected', false);
+  selected = this;
+  d3.select(this).classed('selected', true);
+
+  const tip = document.getElementById('tooltip');
+  tip.innerHTML = `<h3>${d.label.replace('\n',' ')}</h3>
+    <div style="margin-bottom:6px">${d.desc}</div>
+    ${d.details.map(x => `<div>• ${x}</div>`).join('')}
+    <div style="margin-top:6px">${d.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>`;
+  tip.style.display = 'block';
+  const tx = Math.min(event.pageX + 16, W - 300);
+  const ty = Math.max(event.pageY - 20, 60);
+  tip.style.left = tx + 'px';
+  tip.style.top  = ty + 'px';
+  event.stopPropagation();
+}
+root.on('click', () => {
+  document.getElementById('tooltip').style.display = 'none';
+  if (selected) { d3.select(selected).classed('selected', false); selected = null; }
+});
+
+// Controls
+function resetZoom() {
+  root.transition().duration(500)
+    .call(d3.zoom().transform, d3.zoomIdentity.translate(W*0.05, H*0.08).scale(0.85));
+}
+resetZoom();
+
+function filterLayer(layer) {
+  nodeG.selectAll('.node-group').style('opacity', d => layer === 'all' ? 1 : d.layer === layer ? 1 : 0.15);
+  linkG.selectAll('path').style('opacity', lk => {
+    if (layer === 'all') return 0.55;
+    const s = NODES.find(n => n.id === lk.s);
+    const t = NODES.find(n => n.id === lk.t);
+    return (s?.layer === layer || t?.layer === layer) ? 0.8 : 0.05;
+  });
+}
+</script>
+</body>
+</html>
