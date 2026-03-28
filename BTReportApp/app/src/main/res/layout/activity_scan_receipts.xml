@@ -104,24 +104,30 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCamera"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
                 android:text="Camera"
+                android:textSize="12sp"
+                android:maxLines="1"
                 app:icon="@drawable/ic_camera"
-                app:iconSize="18dp"
+                app:iconSize="16dp"
+                app:iconPadding="4dp"
                 app:backgroundTint="@color/primary"
                 style="@style/Widget.MaterialComponents.Button"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPickFiles"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
-                android:text="Gallery"
+                android:text="Files / PDF"
+                android:textSize="12sp"
+                android:maxLines="1"
                 app:icon="@drawable/ic_save"
-                app:iconSize="18dp"
+                app:iconSize="16dp"
+                app:iconPadding="4dp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
         </LinearLayout>
@@ -129,17 +135,21 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnScanAll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:layout_marginBottom="8dp"
             android:text="Scan All with AI"
+            android:textSize="13sp"
+            android:maxLines="1"
             android:enabled="false"
             app:backgroundTint="@color/secondary"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddAll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save All Expenses"
+            android:layout_height="44dp"
+            android:text="Save Expenses"
+            android:textSize="13sp"
+            android:maxLines="1"
             android:enabled="false"
             app:backgroundTint="@color/primary"/>
 

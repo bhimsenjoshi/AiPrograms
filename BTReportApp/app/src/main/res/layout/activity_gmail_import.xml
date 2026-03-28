@@ -133,20 +133,25 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnFetchEmails"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
                 android:text="Fetch Emails"
+                android:textSize="12sp"
+                android:maxLines="1"
                 app:backgroundTint="@color/primary"
                 app:icon="@drawable/ic_save"
-                app:iconSize="16dp"
+                app:iconSize="14dp"
+                app:iconPadding="4dp"
                 style="@style/Widget.MaterialComponents.Button"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSelectAll"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:text="Deselect All"
+                android:textSize="11sp"
+                android:maxLines="1"
                 android:visibility="gone"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
@@ -176,11 +181,14 @@
             android:id="@+id/btnImportSelected"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="Scan Selected"
+            android:text="Scan Selected Emails"
+            android:textSize="13sp"
+            android:maxLines="1"
             android:enabled="false"
             app:backgroundTint="@color/primary"
             app:icon="@drawable/ic_camera"
-            app:iconSize="18dp"
+            app:iconSize="16dp"
+            app:iconPadding="6dp"
             style="@style/Widget.MaterialComponents.Button"/>
 
     </LinearLayout>

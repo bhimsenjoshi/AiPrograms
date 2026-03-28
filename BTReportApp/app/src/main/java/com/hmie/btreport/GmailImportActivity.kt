@@ -39,7 +39,12 @@ class GmailImportViewModel(app: android.app.Application) : AndroidViewModel(app)
     private val service = GmailService(app)
 
     fun checkSignIn() {
-        state.value = if (service.hasGmailPermission()) GmailUiState.Idle else GmailUiState.SignedOut
+        // Only show sign-in screen if there is NO Google account on this device at all.
+        // If an account exists but Gmail permission hasn't been granted yet, the
+        // fetchEmails() → getAccessToken() call will throw UserRecoverableAuthException
+        // and we'll handle the consent screen from there — no repeated account picker.
+        state.value = if (service.getSignedInAccount() == null) GmailUiState.SignedOut
+                      else GmailUiState.Idle
     }
 
     fun fetchEmails(startDate: String, endDate: String) = viewModelScope.launch {
@@ -114,13 +119,25 @@ class GmailImportActivity : AppCompatActivity() {
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                .addOnSuccessListener { vm.fetchEmails(startDate, endDate) }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Sign in failed: ${it.message}", Toast.LENGTH_LONG).show()
-                }
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            try {
+                GoogleSignIn.getSignedInAccountFromIntent(data)
+                    .addOnSuccessListener {
+                        // Account signed in — fetch emails (Gmail consent handled inside fetchEmails
+                        // via UserRecoverableAuthException if scope not yet granted)
+                        vm.fetchEmails(startDate, endDate)
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Sign in failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        vm.checkSignIn()
+                    }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Sign in error: ${e.message}", Toast.LENGTH_LONG).show()
+                vm.checkSignIn()
+            }
         }
+        // If user cancelled (resultCode != RESULT_OK) just stay on sign-in screen
     }
 
     private val authRecovery = registerForActivityResult(

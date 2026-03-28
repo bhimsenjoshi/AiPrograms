@@ -132,7 +132,7 @@ class ScanReceiptsActivity : AppCompatActivity() {
 
     private var pendingCameraUri: Uri? = null
 
-    private val pickFiles = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+    private val pickFiles = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) {
             vm.addItems(uris)
         }
@@ -221,7 +221,7 @@ class ScanReceiptsActivity : AppCompatActivity() {
         }
 
         b.btnPickFiles.setOnClickListener {
-            pickFiles.launch("image/*")
+            pickFiles.launch(arrayOf("image/*", "application/pdf"))
         }
 
         b.btnScanAll.setOnClickListener {
