@@ -84,6 +84,7 @@ class AddExpenseActivity : AppCompatActivity() {
     private fun populate(exp: Expense) {
         b.spinnerType.setSelection(ExpenseType.values().indexOfFirst { it == exp.type })
         b.etDate.setText(exp.date)
+        b.etDepartureTime.setText(exp.departureTime)
         b.etDescription.setText(exp.description)
         b.etFromCity.setText(exp.fromCity)
         b.etToCity.setText(exp.toCity)
@@ -104,6 +105,7 @@ class AddExpenseActivity : AppCompatActivity() {
             tripId = tripId,
             type = type,
             date = b.etDate.text.toString().trim(),
+            departureTime = b.etDepartureTime.text.toString().trim(),
             description = b.etDescription.text.toString().trim(),
             fromCity = b.etFromCity.text.toString().trim(),
             toCity = b.etToCity.text.toString().trim(),
