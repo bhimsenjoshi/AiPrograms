@@ -247,6 +247,24 @@
 
         </LinearLayout>
 
+        <!-- Remove duplicates (shown only when list has entries) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRemoveDuplicates"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginBottom="6dp"
+            android:minHeight="0dp"
+            android:text="Remove Duplicate Entries"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:visibility="gone"
+            app:strokeColor="@color/warning"
+            app:icon="@drawable/ic_save"
+            app:iconSize="12dp"
+            app:iconPadding="4dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
         <!-- Expense list -->
         <FrameLayout
             android:layout_width="match_parent"

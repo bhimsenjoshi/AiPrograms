@@ -70,12 +70,19 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
         }
     }
 
-    fun saveAllExpenses(tripId: Int, onDone: (Int) -> Unit) = viewModelScope.launch {
+    fun saveAllExpenses(tripId: Int, onDone: (Int, Int) -> Unit) = viewModelScope.launch {
         val context = getApplication<android.app.Application>()
         val list = items.value ?: return@launch
-        var count = 0
+        var saved = 0
+        var skipped = 0
         list.filter { it.status == ScanStatus.SUCCESS && it.result != null }.forEach { item ->
             val r = item.result!!
+            // Skip if an identical expense (same type + date + amount) already exists
+            val dupes = db.expenseDao().findDuplicates(tripId, r.expenseType.name, r.date, r.amount)
+            if (dupes.isNotEmpty()) {
+                skipped++
+                return@forEach
+            }
             val savedImage = copyImageToStorage(context, item.uri)
             db.expenseDao().insertExpense(
                 Expense(
@@ -90,9 +97,9 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
                     imageUri = savedImage
                 )
             )
-            count++
+            saved++
         }
-        onDone(count)
+        onDone(saved, skipped)
     }
 
     private fun copyImageToStorage(context: android.app.Application, uri: android.net.Uri): String? {
@@ -230,9 +237,13 @@ class ScanReceiptsActivity : AppCompatActivity() {
         }
 
         b.btnAddAll.setOnClickListener {
-            vm.saveAllExpenses(tripId) { count ->
+            vm.saveAllExpenses(tripId) { saved, skipped ->
                 runOnUiThread {
-                    Toast.makeText(this, "$count expenses added!", Toast.LENGTH_LONG).show()
+                    val msg = if (skipped > 0)
+                        "$saved expenses added, $skipped duplicate(s) skipped."
+                    else
+                        "$saved expenses added!"
+                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                     setResult(RESULT_OK)
                     finish()
                 }

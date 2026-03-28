@@ -20,4 +20,7 @@ interface ExpenseDao {
 
     @Delete
     suspend fun deleteExpense(expense: Expense)
+
+    @Query("SELECT * FROM expenses WHERE tripId = :tripId AND type = :type AND date = :date AND ROUND(amount,2) = ROUND(:amount,2)")
+    suspend fun findDuplicates(tripId: Int, type: String, date: String, amount: Double): List<Expense>
 }

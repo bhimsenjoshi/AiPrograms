@@ -32,6 +32,21 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
         db.expenseDao().deleteExpense(expense)
     }
 
+    fun removeDuplicates(onDone: (Int) -> Unit) = viewModelScope.launch {
+        val all = db.expenseDao().getExpensesForTripSync(tripId)
+        val seen = mutableSetOf<String>()
+        var removed = 0
+        // Sort by id ascending so we keep the earliest entry
+        all.sortedBy { it.id }.forEach { exp ->
+            val key = "${exp.type.name}|${exp.date}|${"%.2f".format(exp.amount)}"
+            if (!seen.add(key)) {
+                db.expenseDao().deleteExpense(exp)
+                removed++
+            }
+        }
+        onDone(removed)
+    }
+
     suspend fun generateDocs(tripId: Int): Pair<File, File> = withContext(Dispatchers.IO) {
         val trip = db.tripDao().getTripById(tripId) ?: error("Trip not found")
         val expenses = db.expenseDao().getExpensesForTripSync(tripId)
@@ -109,7 +124,9 @@ class ExpenseListActivity : AppCompatActivity() {
         b.rvExpenses.adapter = adapter
         vm.expenses.observe(this) { list ->
             adapter.submitList(list)
-            b.tvEmpty.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+            val empty = list.isEmpty()
+            b.tvEmpty.visibility = if (empty) android.view.View.VISIBLE else android.view.View.GONE
+            b.btnRemoveDuplicates.visibility = if (!empty) android.view.View.VISIBLE else android.view.View.GONE
 
             val total    = list.sumOf { it.amount }
             val flights  = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FLIGHT }.sumOf { it.amount }
@@ -144,6 +161,25 @@ class ExpenseListActivity : AppCompatActivity() {
                     putExtra(GmailImportActivity.EXTRA_END_DATE, trip?.endDate ?: "")
                 })
             }
+        }
+
+        // Remove duplicates
+        b.btnRemoveDuplicates.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Remove Duplicates")
+                .setMessage("This will delete expenses with the same type, date, and amount, keeping only the first entry.")
+                .setPositiveButton("Remove") { _, _ ->
+                    vm.removeDuplicates { removed ->
+                        runOnUiThread {
+                            if (removed == 0)
+                                Toast.makeText(this, "No duplicates found.", Toast.LENGTH_SHORT).show()
+                            else
+                                Toast.makeText(this, "$removed duplicate(s) removed.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
         // Manual add
