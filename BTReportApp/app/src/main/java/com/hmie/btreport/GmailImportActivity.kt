@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.hmie.btreport.adapter.GmailEmailAdapter
 import com.hmie.btreport.databinding.ActivityGmailImportBinding
@@ -124,12 +125,23 @@ class GmailImportActivity : AppCompatActivity() {
             try {
                 GoogleSignIn.getSignedInAccountFromIntent(data)
                     .addOnSuccessListener {
-                        // Account signed in — fetch emails (Gmail consent handled inside fetchEmails
-                        // via UserRecoverableAuthException if scope not yet granted)
                         vm.fetchEmails(startDate, endDate)
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(this, "Sign in failed: ${e.message}", Toast.LENGTH_LONG).show()
+                        val msg = if (e is ApiException && e.statusCode == 10) {
+                            "Google OAuth not set up for this app.\n\n" +
+                            "To fix:\n1. Go to console.cloud.google.com\n" +
+                            "2. Enable Gmail API\n" +
+                            "3. Create OAuth client (Android) with package:\n   com.hmie.btreport\n" +
+                            "4. Add your SHA-1 fingerprint\n5. Add your email as test user"
+                        } else {
+                            "Sign in failed (code ${(e as? ApiException)?.statusCode}): ${e.message}"
+                        }
+                        android.app.AlertDialog.Builder(this)
+                            .setTitle("Google Sign-In Failed")
+                            .setMessage(msg)
+                            .setPositiveButton("OK", null)
+                            .show()
                         vm.checkSignIn()
                     }
             } catch (e: Exception) {
@@ -137,7 +149,6 @@ class GmailImportActivity : AppCompatActivity() {
                 vm.checkSignIn()
             }
         }
-        // If user cancelled (resultCode != RESULT_OK) just stay on sign-in screen
     }
 
     private val authRecovery = registerForActivityResult(
@@ -270,9 +281,14 @@ class GmailImportActivity : AppCompatActivity() {
             is GmailUiState.Error -> {
                 b.groupContent.visibility = View.VISIBLE
                 b.btnFetchEmails.isEnabled = true
-                b.tvStatus.text = "Error: ${state.msg}"
-                if (state.msg.contains("403") || state.msg.contains("PERMISSION")) {
-                    b.tvStatus.text = "Gmail access denied (403). Make sure you have enabled the Gmail API in Google Cloud Console for this app."
+                b.tvStatus.text = when {
+                    state.msg.contains("403") || state.msg.contains("PERMISSION") ->
+                        "Gmail access denied (403). Enable Gmail API in Google Cloud Console and add your email as a test user."
+                    state.msg.contains("401") || state.msg.contains("UNAUTHENTICATED") ->
+                        "Authentication expired. Tap 'Fetch Emails' to sign in again."
+                    state.msg.contains("Not signed in") ->
+                        "Not signed in. Tap 'Fetch Emails' to sign in with Google."
+                    else -> "Error: ${state.msg}"
                 }
             }
         }

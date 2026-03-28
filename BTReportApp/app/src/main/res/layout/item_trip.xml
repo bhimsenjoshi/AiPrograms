@@ -118,18 +118,22 @@
                     android:id="@+id/btnDelete"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="34dp"
+                    android:layout_height="32dp"
+                    android:minHeight="0dp"
                     android:text="Delete"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
+                    android:paddingHorizontal="12dp"
                     android:layout_marginEnd="8dp"
                     app:strokeColor="@color/error"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEdit"
                     android:layout_width="wrap_content"
-                    android:layout_height="34dp"
+                    android:layout_height="32dp"
+                    android:minHeight="0dp"
                     android:text="Open Trip"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
+                    android:paddingHorizontal="12dp"
                     app:backgroundTint="@color/primary"/>
 
             </LinearLayout>
