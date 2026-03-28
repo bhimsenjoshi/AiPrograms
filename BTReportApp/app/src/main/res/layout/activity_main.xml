@@ -138,7 +138,7 @@
                 android:layout_gravity="center"
                 android:text="Add Trip"
                 android:textColor="@android:color/white"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 app:backgroundTint="@color/primary"
                 app:icon="@drawable/ic_add"
                 app:iconTint="@android:color/white"

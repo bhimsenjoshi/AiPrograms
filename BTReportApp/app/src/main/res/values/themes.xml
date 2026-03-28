@@ -7,5 +7,14 @@
         <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+    </style>
+
+    <!-- White back arrow and overflow icon on all Toolbars -->
+    <style name="AppToolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="navigationIconTint">@android:color/white</item>
+        <item name="android:background">@color/primary</item>
+        <item name="titleTextColor">@android:color/white</item>
+        <item name="subtitleTextColor">#9FA8DA</item>
     </style>
 </resources>
