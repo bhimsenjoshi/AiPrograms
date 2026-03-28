@@ -49,7 +49,12 @@ class GmailImportViewModel(app: android.app.Application) : AndroidViewModel(app)
             val emails = service.fetchExpenseEmails(token, startDate, endDate)
             state.value = GmailUiState.EmailList(emails)
         } catch (e: UserRecoverableAuthException) {
-            state.value = GmailUiState.AuthRequired(e.intent)
+            val recoveryIntent = e.intent
+            if (recoveryIntent != null) {
+                state.value = GmailUiState.AuthRequired(recoveryIntent)
+            } else {
+                state.value = GmailUiState.Error("Gmail permission required. Please sign in again.")
+            }
         } catch (e: Exception) {
             state.value = GmailUiState.Error(e.message ?: "Unknown error")
         }
