@@ -30,7 +30,7 @@ sealed class GmailUiState {
     object SignedOut : GmailUiState()
     object Loading : GmailUiState()
     data class AuthRequired(val intent: Intent) : GmailUiState()
-    data class EmailList(val items: List<GmailEmailItem>) : GmailUiState()
+    data class EmailList(val items: List<GmailEmailItem>, val query: String = "") : GmailUiState()
     data class Error(val msg: String) : GmailUiState()
 }
 
@@ -52,8 +52,8 @@ class GmailImportViewModel(app: android.app.Application) : AndroidViewModel(app)
         state.value = GmailUiState.Loading
         try {
             val token = service.getAccessToken()
-            val emails = service.fetchExpenseEmails(token, startDate, endDate)
-            state.value = GmailUiState.EmailList(emails)
+            val (emails, query) = service.fetchExpenseEmails(token, startDate, endDate)
+            state.value = GmailUiState.EmailList(emails, query)
         } catch (e: UserRecoverableAuthException) {
             val recoveryIntent = e.intent
             if (recoveryIntent != null) {
@@ -273,16 +273,11 @@ class GmailImportActivity : AppCompatActivity() {
                 emailAdapter.submitList(state.items)
                 val count = state.items.size
                 b.tvStatus.text = when {
-                    count == 0 && startDate.isNotBlank() ->
-                        "No emails found between $startDate and $endDate. " +
-                        "Make sure your trip dates are set correctly on the trip."
                     count == 0 ->
-                        "No expense-related emails found. Set trip start/end dates for a broader search."
-                    startDate.isNotBlank() ->
-                        "$count emails found between $startDate and $endDate. " +
-                        "Select the ones with receipts/tickets and tap 'Scan Selected'."
+                        "No emails found.\nQuery used: ${state.query}\n\n" +
+                        "Check that your trip start/end dates are filled in, or that your Gmail has emails in this period."
                     else ->
-                        "$count emails found. Select the ones to scan."
+                        "$count emails found. Select the ones with receipts/tickets and tap 'Scan Selected'."
                 }
                 b.btnImportSelected.isEnabled = count > 0
                 b.btnSelectAll.visibility = if (count > 1) View.VISIBLE else View.GONE

@@ -61,12 +61,13 @@ class GmailService(private val context: Context) {
         token: String,
         startDate: String,  // "dd-MMM-yyyy"
         endDate: String     // "dd-MMM-yyyy"
-    ): List<GmailEmailItem> = withContext(Dispatchers.IO) {
+    ): Pair<List<GmailEmailItem>, String> = withContext(Dispatchers.IO) {
         val query = buildQuery(startDate, endDate)
         val ids = listMessageIds(token, query)
-        ids.mapNotNull { id ->
+        val items = ids.mapNotNull { id ->
             try { fetchEmailItem(token, id) } catch (e: Exception) { null }
         }
+        Pair(items, query)
     }
 
     suspend fun downloadAttachment(
@@ -89,8 +90,16 @@ class GmailService(private val context: Context) {
             .url("$BASE/messages?q=$encoded&maxResults=100")
             .addHeader("Authorization", "Bearer $token")
             .build()
-        val body = client.newCall(req).execute().use { it.body?.string() ?: return emptyList() }
+        val body = client.newCall(req).execute().use { it.body?.string() ?: "" }
         val json = JSONObject(body)
+
+        // Surface any API-level error instead of silently returning empty list
+        json.optJSONObject("error")?.let { err ->
+            val code = err.optInt("code", 0)
+            val msg  = err.optString("message", "Unknown error")
+            throw Exception("Gmail API error $code: $msg")
+        }
+
         val messages = json.optJSONArray("messages") ?: return emptyList()
         return (0 until messages.length()).map { messages.getJSONObject(it).getString("id") }
     }
