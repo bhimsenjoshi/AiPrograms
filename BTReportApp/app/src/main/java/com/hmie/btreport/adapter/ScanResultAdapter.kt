@@ -1,5 +1,6 @@
 package com.hmie.btreport.adapter
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,43 +16,71 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
     inner class VH(private val b: ItemScanResultBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(item: ScanItem) {
             b.tvFileName.text = item.fileName
+            tryLoadImage(item.uri)
 
             when (item.status) {
                 ScanStatus.PENDING -> {
-                    b.tvStatus.text = "Pending"
-                    b.tvStatus.setTextColor(0xFF757575.toInt())
                     b.progressScan.visibility = View.GONE
-                    b.tvResult.visibility = View.GONE
+                    b.tvStatus.text = "Pending scan"
+                    b.tvStatus.setTextColor(0xFF9CA3AF.toInt())
+                    b.tvStatusBadge.visibility = View.GONE
+                    b.layoutResult.visibility = View.GONE
+                    b.tvError.visibility = View.GONE
                 }
                 ScanStatus.SCANNING -> {
-                    b.tvStatus.text = "Scanning…"
-                    b.tvStatus.setTextColor(0xFF1565C0.toInt())
                     b.progressScan.visibility = View.VISIBLE
-                    b.tvResult.visibility = View.GONE
+                    b.layoutPending.visibility = View.GONE
+                    b.tvStatus.text = "Extracting data…"
+                    b.tvStatus.setTextColor(0xFF1A237E.toInt())
+                    b.tvStatusBadge.visibility = View.VISIBLE
+                    b.tvStatusBadge.text = "SCANNING"
+                    b.layoutResult.visibility = View.GONE
+                    b.tvError.visibility = View.GONE
                 }
                 ScanStatus.SUCCESS -> {
                     b.progressScan.visibility = View.GONE
-                    b.tvResult.visibility = View.VISIBLE
+                    b.layoutPending.visibility = View.GONE
+                    b.tvStatusBadge.visibility = View.VISIBLE
+                    b.tvStatusBadge.text = "✓  AI EXTRACTION SUCCESS"
+                    b.tvStatusBadge.setTextColor(0xFFFFFFFF.toInt())
+                    b.tvStatusBadge.setBackgroundColor(0xFF16A34A.toInt())
                     val r = item.result!!
-                    b.tvStatus.text = "✓ ${r.expenseType.displayName}"
-                    b.tvStatus.setTextColor(0xFF2E7D32.toInt())
-                    b.tvResult.text = buildString {
-                        if (r.date.isNotBlank()) appendLine("Date: ${r.date}")
-                        if (r.fromCity.isNotBlank() || r.toCity.isNotBlank())
-                            appendLine("Route: ${r.fromCity} → ${r.toCity}")
-                        if (r.receiptRef.isNotBlank()) appendLine("Ref: ${r.receiptRef}")
-                        if (r.operator.isNotBlank()) appendLine("Operator: ${r.operator}")
-                        appendLine("Amount: Rs. ${"%.2f".format(r.amount)}")
-                        if (r.description.isNotBlank()) append("Note: ${r.description}")
-                    }.trimEnd()
+                    b.tvStatus.text = "Review Parsed Data"
+                    b.tvStatus.setTextColor(0xFF111827.toInt())
+                    b.tvVendor.text = r.operator.ifBlank { r.description.take(28).ifBlank { "—" } }
+                    b.tvAmount.text = "₹${"%.2f".format(r.amount)}"
+                    b.tvDate.text = r.date.ifBlank { "—" }
+                    b.tvCategory.text = r.expenseType.displayName
+                    if (r.fromCity.isNotBlank()) {
+                        b.layoutRoute.visibility = View.VISIBLE
+                        b.tvRoute.text = "${r.fromCity} → ${r.toCity}"
+                    } else {
+                        b.layoutRoute.visibility = View.GONE
+                    }
+                    b.layoutResult.visibility = View.VISIBLE
+                    b.tvError.visibility = View.GONE
                 }
                 ScanStatus.ERROR -> {
                     b.progressScan.visibility = View.GONE
-                    b.tvResult.visibility = View.VISIBLE
-                    b.tvStatus.text = "✗ Failed"
-                    b.tvStatus.setTextColor(0xFFC62828.toInt())
-                    b.tvResult.text = item.error ?: "Unknown error"
+                    b.tvStatus.text = "Extraction failed"
+                    b.tvStatus.setTextColor(0xFFDC2626.toInt())
+                    b.tvStatusBadge.visibility = View.VISIBLE
+                    b.tvStatusBadge.text = "FAILED"
+                    b.tvStatusBadge.setBackgroundColor(0xFFDC2626.toInt())
+                    b.layoutResult.visibility = View.GONE
+                    b.tvError.visibility = View.VISIBLE
+                    b.tvError.text = item.error ?: "Unknown error"
                 }
+            }
+        }
+
+        private fun tryLoadImage(uri: Uri) {
+            try {
+                b.ivReceiptPreview.setImageURI(uri)
+                b.ivReceiptPreview.visibility = View.VISIBLE
+                b.layoutPending.visibility = View.GONE
+            } catch (e: Exception) {
+                b.ivReceiptPreview.visibility = View.GONE
             }
         }
     }

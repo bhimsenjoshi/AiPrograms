@@ -2,34 +2,173 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_margin="4dp" app:cardCornerRadius="8dp" app:cardElevation="2dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="12dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:gravity="center_vertical">
+        <!-- Receipt image preview (teal bg, matches mockup) -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="#2D6A4F">
 
-            <ProgressBar android:id="@+id/progressScan"
-                android:layout_width="20dp" android:layout_height="20dp"
-                android:layout_marginEnd="8dp" android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/ivReceiptPreview"
+                android:layout_width="120dp"
+                android:layout_height="140dp"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"
+                android:visibility="gone"
+                android:background="@android:color/white"
+                android:elevation="4dp"/>
 
-            <TextView android:id="@+id/tvFileName"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:textStyle="bold" android:textSize="13sp"
-                android:ellipsize="end" android:maxLines="1"/>
+            <!-- Scanning spinner overlay -->
+            <ProgressBar
+                android:id="@+id/progressScan"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+            <!-- Pending / file name overlay -->
+            <LinearLayout
+                android:id="@+id/layoutPending"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="📄" android:textSize="32sp"/>
+                <TextView
+                    android:id="@+id/tvFileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:layout_marginTop="6dp"
+                    android:maxLines="2"
+                    android:ellipsize="middle"
+                    android:textAlignment="center"
+                    android:paddingHorizontal="16dp"/>
+            </LinearLayout>
+
+            <!-- Status badge top-right -->
+            <TextView
+                android:id="@+id/tvStatusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/chip_gray_bg"
+                android:visibility="gone"/>
+        </FrameLayout>
+
+        <!-- Parsed data section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Parsed result grid -->
+            <LinearLayout
+                android:id="@+id/layoutResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="6dp">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="VENDOR" android:textSize="9sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.08"/>
+                        <TextView android:id="@+id/tvVendor"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textSize="13sp" android:textStyle="bold" android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="AMOUNT" android:textSize="9sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.08"/>
+                        <TextView android:id="@+id/tvAmount"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textSize="13sp" android:textStyle="bold" android:textColor="@color/primary"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="DATE" android:textSize="9sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.08"/>
+                        <TextView android:id="@+id/tvDate"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textSize="13sp" android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="CATEGORY" android:textSize="9sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.08"/>
+                        <TextView android:id="@+id/tvCategory"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:textSize="13sp" android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Route (if available) -->
+                <LinearLayout
+                    android:id="@+id/layoutRoute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="6dp"
+                    android:visibility="gone">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ROUTE" android:textSize="9sp"
+                        android:textColor="@color/on_surface_variant" android:letterSpacing="0.08"/>
+                    <TextView android:id="@+id/tvRoute"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textSize="13sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Error message -->
+            <TextView
+                android:id="@+id/tvError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/error"
+                android:visibility="gone"/>
+
         </LinearLayout>
-
-        <TextView android:id="@+id/tvStatus"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textSize="13sp" android:layout_marginTop="4dp"/>
-
-        <TextView android:id="@+id/tvResult"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textSize="12sp" android:textColor="#424242"
-            android:layout_marginTop="4dp" android:visibility="gone"
-            android:background="#F5F5F5" android:padding="8dp"
-            android:fontFamily="monospace"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

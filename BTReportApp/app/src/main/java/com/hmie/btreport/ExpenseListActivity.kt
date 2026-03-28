@@ -111,8 +111,18 @@ class ExpenseListActivity : AppCompatActivity() {
         vm.expenses.observe(this) { list ->
             adapter.submitList(list)
             b.tvEmpty.visibility = if (list.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-            val total = list.sumOf { it.amount }
-            b.tvTotal.text = "Total: Rs. ${"%.2f".format(total)}"
+
+            val total    = list.sumOf { it.amount }
+            val flights  = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FLIGHT }.sumOf { it.amount }
+            val cab      = list.filter { it.type == com.hmie.btreport.model.ExpenseType.CAB }.sumOf { it.amount }
+            val food     = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FOOD }.sumOf { it.amount }
+            val hotel    = list.filter { it.type == com.hmie.btreport.model.ExpenseType.HOTEL }.sumOf { it.amount }
+
+            b.tvTotal.text       = "%.0f".format(total)
+            b.tvFlightTotal.text = "₹${"%.0f".format(flights)}"
+            b.tvCabTotal.text    = "₹${"%.0f".format(cab)}"
+            b.tvFoodTotal.text   = "₹${"%.0f".format(food)}"
+            b.tvHotelTotal.text  = "₹${"%.0f".format(hotel)}"
         }
 
         // Scan receipts with AI

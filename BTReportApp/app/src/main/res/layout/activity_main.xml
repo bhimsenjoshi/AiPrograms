@@ -4,64 +4,89 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="@color/background">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- Top header – HMIE Expense brand bar -->
+    <LinearLayout
+        android:id="@+id/headerBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp">
+        android:background="@color/surface"
+        android:elevation="4dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:gravity="center_vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            app:titleTextColor="@android:color/white"
-            app:subtitleTextColor="#BBDEFB"
-            android:subtitle="Domestic Business Trip Settlement"/>
+        <!-- Logo circle -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="@color/primary"
+            app:cardElevation="0dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="H"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="10dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HMIE Expense"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:textSize="17sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENGINEERING EXCELLENCE"
+                android:textColor="@color/on_surface_variant"
+                android:textSize="10sp"
+                android:letterSpacing="0.08"/>
+        </LinearLayout>
 
+        <ImageView
+            android:id="@+id/btnSettings"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_settings"
+            android:contentDescription="Settings"
+            android:padding="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Main content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_marginTop="64dp"
+        android:background="@color/background">
 
-        <!-- Company header card -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Section label -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="3dp"
-            app:cardBackgroundColor="@color/primary">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="HYUNDAI MOTOR INDIA ENGINEERING"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.05"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="BT Report Generator"
-                    android:textColor="#BBDEFB"
-                    android:textSize="12sp"
-                    android:layout_marginTop="2dp"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:text="MY BUSINESS TRIPS"
+            android:textColor="@color/on_surface_variant"
+            android:textSize="11sp"
+            android:letterSpacing="0.1"
+            android:textStyle="bold"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"/>
 
         <!-- Trip list -->
         <androidx.recyclerview.widget.RecyclerView
@@ -69,8 +94,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingHorizontal="8dp"
-            android:paddingBottom="80dp"
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="88dp"
             android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
@@ -79,32 +104,78 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No trips yet.\nTap + to start your first Business Trip report."
+            android:text="No trips yet.\nTap + to create your first Business Trip."
             android:textAlignment="center"
             android:textColor="@color/on_surface_variant"
             android:textSize="14sp"
             android:visibility="gone"/>
 
-        <!-- Footer credit -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Developed by Bhimsen Joshi | Software Development Dept, HMIE"
-            android:textColor="@color/on_surface_variant"
-            android:textSize="10sp"
-            android:textAlignment="center"
-            android:padding="6dp"/>
-
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="New Trip"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary"/>
+    <!-- Invisible toolbar needed for ViewBinding -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
+
+    <!-- Bottom nav bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:src="@drawable/ic_add"
+                android:colorFilter="@color/primary"
+                android:contentDescription="Home"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Home" android:textSize="10sp" android:textColor="@color/primary"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Centre FAB-style New Trip -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="New Trip"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="@color/primary"
+                app:fabSize="mini"/>
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/navSettings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:src="@drawable/ic_settings"
+                android:colorFilter="@color/on_surface_variant"
+                android:contentDescription="Settings"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Settings" android:textSize="10sp"
+                android:textColor="@color/on_surface_variant"/>
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
-        setSupportActionBar(b.toolbar)
 
         val adapter = TripAdapter(
             onEdit = { trip ->
@@ -63,6 +62,12 @@ class MainActivity : AppCompatActivity() {
 
         b.fab.setOnClickListener {
             startActivity(Intent(this, TripFormActivity::class.java))
+        }
+        b.btnSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        b.navSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
 }

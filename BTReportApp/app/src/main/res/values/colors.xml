@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#1565C0</color>
-    <color name="primary_dark">#003C8F</color>
-    <color name="primary_container">#BBDEFB</color>
-    <color name="on_primary_container">#0D47A1</color>
-    <color name="secondary">#00695C</color>
-    <color name="secondary_container">#B2DFDB</color>
-    <color name="on_surface_variant">#757575</color>
-    <color name="error">#C62828</color>
+    <!-- Primary – dark navy (HMIE brand) -->
+    <color name="primary">#1A237E</color>
+    <color name="primary_dark">#0D1757</color>
+    <color name="primary_container">#E8EAF6</color>
+    <color name="on_primary_container">#1A237E</color>
+
+    <!-- Secondary – teal -->
+    <color name="secondary">#00897B</color>
+    <color name="secondary_container">#E0F2F1</color>
+
+    <!-- Surfaces -->
+    <color name="background">#F0F2F8</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="on_surface_variant">#6B7280</color>
+    <color name="text_primary">#111827</color>
+
+    <!-- Status -->
+    <color name="success">#16A34A</color>
+    <color name="success_bg">#DCFCE7</color>
+    <color name="warning">#D97706</color>
+    <color name="warning_bg">#FEF3C7</color>
+    <color name="error">#DC2626</color>
+    <color name="error_bg">#FEE2E2</color>
+
+    <!-- Category colours -->
+    <color name="cat_flight">#2563EB</color>
+    <color name="cat_cab">#7C3AED</color>
+    <color name="cat_food">#DC2626</color>
+    <color name="cat_hotel">#D97706</color>
+    <color name="cat_other">#6B7280</color>
 </resources>

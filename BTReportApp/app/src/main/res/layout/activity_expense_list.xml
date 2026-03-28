@@ -4,17 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="@color/background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:elevation="4dp">
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
-            app:titleTextColor="@android:color/white"/>
+            app:titleTextColor="@android:color/white"
+            app:subtitleTextColor="#9FA8DA"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
@@ -23,47 +25,202 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Action bar -->
+        <!-- ── TOTAL REIMBURSEMENT card (dark navy) ───────────────────── -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/primary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TOTAL REIMBURSEMENT CLAIM"
+                    android:textColor="#9FA8DA"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.08"
+                    android:textStyle="bold"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="bottom"
+                    android:layout_marginTop="4dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₹"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+                    <TextView
+                        android:id="@+id/tvTotal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textColor="@android:color/white"
+                        android:textSize="36sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="2dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="INR"
+                        android:textColor="#9FA8DA"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="8dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ── CATEGORY summary grid ─────────────────────────────────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp">
+
+            <!-- Flights – full width -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                app:cardCornerRadius="10dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingHorizontal="14dp" android:paddingVertical="12dp"
+                    android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:layout_width="28dp" android:layout_height="28dp"
+                        android:text="✈" android:textSize="16sp" android:gravity="center"
+                        android:textColor="@color/cat_flight"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginStart="10dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="FLIGHTS" android:textSize="10sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"/>
+                        <TextView android:id="@+id/tvFlightTotal"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="₹0" android:textSize="17sp" android:textStyle="bold"
+                            android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="›" android:textSize="20sp" android:textColor="@color/on_surface_variant"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Cab – full width -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                app:cardCornerRadius="10dp" app:cardElevation="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingHorizontal="14dp" android:paddingVertical="12dp"
+                    android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:layout_width="28dp" android:layout_height="28dp"
+                        android:text="🚗" android:textSize="16sp" android:gravity="center"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginStart="10dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="CAB / TRANSPORT" android:textSize="10sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"/>
+                        <TextView android:id="@+id/tvCabTotal"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="₹0" android:textSize="17sp" android:textStyle="bold"
+                            android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="›" android:textSize="20sp" android:textColor="@color/on_surface_variant"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Food + Hotel side by side -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="6dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp" android:layout_height="match_parent"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="10dp" app:cardElevation="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:padding="12dp" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="🍽" android:textSize="18sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="FOOD" android:textSize="10sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"
+                            android:layout_marginTop="4dp"/>
+                        <TextView android:id="@+id/tvFoodTotal"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="₹0" android:textSize="16sp" android:textStyle="bold"
+                            android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp" android:layout_height="match_parent"
+                    android:layout_weight="1" android:layout_marginStart="4dp"
+                    app:cardCornerRadius="10dp" app:cardElevation="1dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:padding="12dp" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="🏨" android:textSize="18sp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="HOTEL" android:textSize="10sp"
+                            android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"
+                            android:layout_marginTop="4dp"/>
+                        <TextView android:id="@+id/tvHotelTotal"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="₹0" android:textSize="16sp" android:textStyle="bold"
+                            android:textColor="@color/text_primary"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ── EXPENSE DOCUMENTS section ─────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp">
-
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Expense Documents"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnScanReceipts"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:text="Scan Receipts"
-                app:backgroundTint="@color/secondary"
-                app:icon="@drawable/ic_camera"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnGenerateDocs"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Generate"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Scan"
+                android:textSize="12sp"
                 app:backgroundTint="@color/primary"
-                app:icon="@drawable/ic_save"
+                app:icon="@drawable/ic_camera"
+                app:iconSize="14dp"
                 style="@style/Widget.MaterialComponents.Button"/>
         </LinearLayout>
-
-        <!-- Total strip -->
-        <TextView
-            android:id="@+id/tvTotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary_container"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="8dp"
-            android:text="Total: Rs. 0.00"
-            android:textColor="@color/on_primary_container"
-            android:textSize="14sp"
-            android:textStyle="bold"/>
 
         <!-- Expense list -->
         <FrameLayout
@@ -75,9 +232,9 @@
                 android:id="@+id/rvExpenses"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="8dp"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="88dp"
                 android:clipToPadding="false"
-                android:paddingBottom="72dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
             <TextView
@@ -85,7 +242,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No expenses yet.\nTap 'Scan Receipts' to auto-import\nor tap + to add manually."
+                android:text="No receipts yet.\nTap Scan to auto-import or + to add manually."
                 android:textAlignment="center"
                 android:textColor="@color/on_surface_variant"
                 android:visibility="gone"/>
@@ -93,14 +250,37 @@
 
     </LinearLayout>
 
+    <!-- Floating action button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        android:layout_marginBottom="72dp"
         android:contentDescription="Add Expense"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/primary"/>
+
+    <!-- Bottom action bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGenerateDocs"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="Generate Excel + Word Report"
+            app:backgroundTint="@color/primary"
+            app:icon="@drawable/ic_save"
+            style="@style/Widget.MaterialComponents.Button"/>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

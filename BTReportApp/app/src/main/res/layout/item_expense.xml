@@ -4,99 +4,129 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="1dp">
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:strokeColor="#F3F4F6"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
 
+        <!-- Receipt thumbnail -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThumb"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/primary_container">
+            <ImageView
+                android:id="@+id/ivThumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/tvTypeIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="22sp"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Details -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tvExpenseType"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+                <TextView
+                    android:id="@+id/tvExpenseAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/primary"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="2dp"
+                android:gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tvExpenseDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textColor="@color/on_surface_variant"
+                    android:layout_marginEnd="6dp"/>
+                <TextView
+                    android:id="@+id/tvExpenseDesc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:textColor="@color/on_surface_variant"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvExpenseType"
-                android:layout_width="0dp"
+                android:id="@+id/tvReceiptRef"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="@color/primary"/>
-
-            <TextView
-                android:id="@+id/tvExpenseAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="15sp"
-                android:textColor="@color/secondary"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp">
-
-            <TextView
-                android:id="@+id/tvExpenseDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/on_surface_variant"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:id="@+id/tvExpenseDesc"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="13sp"
-                android:ellipsize="end"
-                android:maxLines="1"/>
+                android:layout_marginTop="2dp"/>
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvReceiptRef"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="@color/on_surface_variant"
-            android:layout_marginTop="2dp"/>
-
+        <!-- Action buttons (vertical) -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="6dp">
+            android:orientation="vertical"
+            android:layout_marginStart="6dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEdit"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit"
+                android:layout_width="40dp"
+                android:layout_height="32dp"
+                android:text="✏"
+                android:textSize="14sp"
                 android:minWidth="0dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"/>
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
+                android:layout_width="40dp"
+                android:layout_height="32dp"
+                android:text="🗑"
+                android:textSize="14sp"
                 android:minWidth="0dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
                 android:textColor="@color/error"/>
 
         </LinearLayout>
