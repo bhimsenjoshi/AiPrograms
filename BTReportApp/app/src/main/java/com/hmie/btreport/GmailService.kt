@@ -166,23 +166,32 @@ class GmailService(private val context: Context) {
             "${cal.get(Calendar.YEAR)}/${cal.get(Calendar.MONTH) + 1}/${cal.get(Calendar.DAY_OF_MONTH)}"
         } catch (e: Exception) { "" }
 
-        return if (start.isNotBlank() && end.isNotBlank()) {
-            // Date range is known — fetch ALL emails in that period.
-            // No keyword restriction so nothing is missed; user picks what's relevant.
-            "after:$start before:$end"
-        } else {
-            // No dates — broad keyword search for expense-related emails
-            "(has:attachment OR subject:ticket OR subject:boarding pass OR " +
+        val dateFilter = if (start.isNotBlank() && end.isNotBlank()) "after:$start before:$end " else ""
+
+        // Always filter to expense-related emails only
+        val keywords = "(" +
+            // Subjects
+            "subject:ticket OR subject:\"boarding pass\" OR subject:itinerary OR " +
             "subject:receipt OR subject:invoice OR subject:bill OR " +
-            "subject:booking confirmation OR subject:itinerary OR subject:payment OR " +
-            "subject:e-ticket OR subject:order confirmation OR " +
-            "from:irctc.co.in OR from:makemytrip.com OR from:goibibo.com OR " +
-            "from:cleartrip.com OR from:yatra.com OR from:ixigo.com OR " +
-            "from:olacabs.com OR from:uber.com OR from:rapido.bike OR " +
+            "subject:\"booking confirmation\" OR subject:\"payment confirmation\" OR " +
+            "subject:\"e-ticket\" OR subject:\"trip confirmation\" OR " +
+            "subject:cab OR subject:ride OR subject:\"your trip\" OR " +
+            // Flight senders
             "from:goindigo.in OR from:spicejet.com OR from:airindia.in OR " +
-            "from:airvistara.com OR from:akasaair.com OR " +
+            "from:airvistara.com OR from:akasaair.com OR from:starair.in OR " +
+            // Travel portals
+            "from:makemytrip.com OR from:goibibo.com OR from:cleartrip.com OR " +
+            "from:yatra.com OR from:ixigo.com OR from:irctc.co.in OR " +
+            // Cab / ride
+            "from:olacabs.com OR from:uber.com OR from:rapido.bike OR " +
+            "from:jugnoo.in OR from:meru.in OR " +
+            // Hotel
             "from:oyorooms.com OR from:treebo.com OR from:fabhotels.com OR " +
-            "from:swiggy.in OR from:zomato.com)"
-        }
+            "from:hotels.com OR from:booking.com OR from:airbnb.com OR " +
+            // Food
+            "from:swiggy.in OR from:zomato.com" +
+            ")"
+
+        return "$dateFilter$keywords"
     }
 }
