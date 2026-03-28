@@ -27,6 +27,9 @@ class ExpenseListViewModel(app: android.app.Application) : AndroidViewModel(app)
     var tripId: Int = 0
 
     val expenses by lazy { db.expenseDao().getExpensesForTrip(tripId) }
+    val trip by lazy {
+        androidx.lifecycle.liveData { emit(db.tripDao().getTripById(tripId)) }
+    }
 
     fun deleteExpense(expense: Expense) = viewModelScope.launch {
         db.expenseDao().deleteExpense(expense)
@@ -132,17 +135,21 @@ class ExpenseListActivity : AppCompatActivity() {
             b.tvEmpty.visibility = if (empty) android.view.View.VISIBLE else android.view.View.GONE
             b.btnRemoveDuplicates.visibility = if (!empty) android.view.View.VISIBLE else android.view.View.GONE
 
-            val total    = list.sumOf { it.amount }
-            val flights  = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FLIGHT }.sumOf { it.amount }
-            val cab      = list.filter { it.type == com.hmie.btreport.model.ExpenseType.CAB }.sumOf { it.amount }
-            val food     = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FOOD }.sumOf { it.amount }
-            val hotel    = list.filter { it.type == com.hmie.btreport.model.ExpenseType.HOTEL }.sumOf { it.amount }
+            val total = list.sumOf { it.amount }
+            val cab   = list.filter { it.type == com.hmie.btreport.model.ExpenseType.CAB }.sumOf { it.amount }
+            val food  = list.filter { it.type == com.hmie.btreport.model.ExpenseType.FOOD }.sumOf { it.amount }
+            val hotel = list.filter { it.type == com.hmie.btreport.model.ExpenseType.HOTEL }.sumOf { it.amount }
 
-            b.tvTotal.text       = "%.0f".format(total)
-            b.tvFlightTotal.text = "₹${"%.0f".format(flights)}"
-            b.tvCabTotal.text    = "₹${"%.0f".format(cab)}"
-            b.tvFoodTotal.text   = "₹${"%.0f".format(food)}"
-            b.tvHotelTotal.text  = "₹${"%.0f".format(hotel)}"
+            b.tvTotal.text     = "%.0f".format(total)
+            b.tvCabTotal.text  = "₹${"%.0f".format(cab)}"
+            b.tvFoodTotal.text = "₹${"%.0f".format(food)}"
+            b.tvHotelTotal.text = "₹${"%.0f".format(hotel)}"
+        }
+
+        // Show flight route from trip
+        vm.trip.observe(this) { trip ->
+            val route = trip?.route?.trim()
+            b.tvFlightRoute.text = if (!route.isNullOrBlank()) route else "—"
         }
 
         // Scan receipts with AI

@@ -94,31 +94,33 @@
             android:orientation="vertical"
             android:paddingHorizontal="12dp">
 
-            <!-- Flights – full width -->
+            <!-- Flight Route – full width (replaces flights total) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                app:cardCornerRadius="10dp" app:cardElevation="1dp">
+                app:cardCornerRadius="10dp"
+                app:cardElevation="1dp"
+                app:cardBackgroundColor="#EEF2FF">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:paddingHorizontal="14dp" android:paddingVertical="12dp"
                     android:gravity="center_vertical" android:orientation="horizontal">
                     <TextView android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="✈" android:textSize="16sp" android:gravity="center"
+                        android:text="✈" android:textSize="18sp" android:gravity="center"
                         android:textColor="@color/cat_flight"/>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:orientation="vertical"
                         android:layout_marginStart="10dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="FLIGHTS" android:textSize="10sp"
+                            android:text="FLIGHT ROUTE" android:textSize="10sp"
                             android:textColor="@color/on_surface_variant" android:letterSpacing="0.05"/>
-                        <TextView android:id="@+id/tvFlightTotal"
+                        <TextView android:id="@+id/tvFlightRoute"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="₹0" android:textSize="17sp" android:textStyle="bold"
-                            android:textColor="@color/text_primary"/>
+                            android:text="—"
+                            android:textSize="17sp" android:textStyle="bold"
+                            android:textColor="@color/cat_flight"
+                            android:maxLines="1" android:ellipsize="end"/>
                     </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="›" android:textSize="20sp" android:textColor="@color/on_surface_variant"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
