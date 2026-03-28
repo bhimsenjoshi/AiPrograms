@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/background">
+
+    <!-- Hidden toolbar needed for ViewBinding -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
 
     <!-- Top header – HMIE Expense brand bar -->
     <LinearLayout
@@ -67,35 +75,31 @@
 
     </LinearLayout>
 
-    <!-- Main content -->
-    <LinearLayout
+    <!-- Section label -->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="64dp"
-        android:background="@color/background">
+        android:layout_height="wrap_content"
+        android:text="MY BUSINESS TRIPS"
+        android:textColor="@color/on_surface_variant"
+        android:textSize="11sp"
+        android:letterSpacing="0.1"
+        android:textStyle="bold"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"/>
 
-        <!-- Section label -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="MY BUSINESS TRIPS"
-            android:textColor="@color/on_surface_variant"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"
-            android:textStyle="bold"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"/>
+    <!-- Content area: list + empty state overlay -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <!-- Trip list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTrips"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:paddingHorizontal="12dp"
-            android:paddingBottom="88dp"
+            android:paddingBottom="8dp"
             android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
@@ -110,24 +114,17 @@
             android:textSize="14sp"
             android:visibility="gone"/>
 
-    </LinearLayout>
-
-    <!-- Invisible toolbar needed for ViewBinding -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"/>
+    </FrameLayout>
 
     <!-- Bottom nav bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:layout_gravity="bottom"
         android:background="@color/surface"
         android:elevation="8dp"
         android:orientation="horizontal">
 
+        <!-- Home tab -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -147,8 +144,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center">
+            android:layout_weight="1">
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
@@ -160,6 +156,7 @@
                 app:fabSize="mini"/>
         </FrameLayout>
 
+        <!-- Settings tab -->
         <LinearLayout
             android:id="@+id/navSettings"
             android:layout_width="0dp"
@@ -178,4 +175,4 @@
 
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

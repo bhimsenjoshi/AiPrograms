@@ -1,7 +1,9 @@
 package com.hmie.btreport
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -9,6 +11,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -125,10 +129,24 @@ class ScanReceiptsActivity : AppCompatActivity() {
     private var tripId = 0
     private lateinit var adapter: ScanResultAdapter
 
+    private var pendingCameraUri: Uri? = null
+
     private val pickFiles = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         if (uris.isNotEmpty()) {
             vm.addItems(uris)
         }
+    }
+
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            pendingCameraUri?.let { vm.addItems(listOf(it)) }
+        }
+        pendingCameraUri = null
+    }
+
+    private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) launchCamera()
+        else Toast.makeText(this, "Camera permission is required to take photos", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -185,8 +203,17 @@ class ScanReceiptsActivity : AppCompatActivity() {
             } else ""
         }
 
+        b.btnCamera.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+                launchCamera()
+            } else {
+                requestCameraPermission.launch(Manifest.permission.CAMERA)
+            }
+        }
+
         b.btnPickFiles.setOnClickListener {
-            pickFiles.launch("*/*")
+            pickFiles.launch("image/*")
         }
 
         b.btnScanAll.setOnClickListener {
@@ -203,6 +230,14 @@ class ScanReceiptsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun launchCamera() {
+        val dir = java.io.File(filesDir, "receipts").also { it.mkdirs() }
+        val file = java.io.File(dir, "cam_${System.currentTimeMillis()}.jpg")
+        val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+        pendingCameraUri = uri
+        takePicture.launch(uri)
     }
 
     override fun onSupportNavigateUp(): Boolean { finish(); return true }

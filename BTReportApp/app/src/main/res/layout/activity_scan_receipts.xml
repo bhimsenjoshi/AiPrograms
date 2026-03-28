@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:orientation="vertical"
+    android:background="@color/background">
 
+    <!-- Header -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -17,110 +19,130 @@
             app:titleTextColor="@android:color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
+    <!-- Instruction card -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <!-- Instruction card -->
-        <com.google.android.material.card.MaterialCardView
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/primary_container">
+        <TextView
+            android:id="@+id/tvBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/primary_container">
+            android:padding="12dp"
+            android:text="Upload boarding passes, cab receipts or food bills. AI will auto-identify type, extract amounts and route."
+            android:textColor="@color/on_primary_container"
+            android:textSize="13sp"/>
+    </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/tvBanner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:text="Upload boarding passes, cab receipts or food bills (images or PDFs). AI will auto-identify type, extract amounts and route."
-                android:textColor="@color/on_primary_container"
-                android:textSize="13sp"/>
-        </com.google.android.material.card.MaterialCardView>
+    <!-- Status row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="4dp"
+        android:gravity="center_vertical">
 
-        <!-- Status row -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/tvScanStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textColor="@color/on_surface_variant"/>
+    </LinearLayout>
+
+    <!-- Scan results list -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvScanResults"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false"/>
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="No files added yet.\nUse Camera or Gallery below."
+            android:textAlignment="center"
+            android:textColor="@color/on_surface_variant"/>
+    </FrameLayout>
+
+    <!-- Action buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="@color/surface"
+        android:elevation="4dp">
+
+        <!-- Add source: Camera + Gallery side by side -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="6dp"
-            android:gravity="center_vertical">
+            android:layout_marginBottom="8dp">
 
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="8dp"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/tvScanStatus"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCamera"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="13sp"
-                android:textColor="@color/on_surface_variant"/>
-        </LinearLayout>
-
-        <!-- List -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvScanResults"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:clipToPadding="false"/>
-
-            <TextView
-                android:id="@+id/tvEmpty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="No files added yet.\nTap 'Choose Files' to begin."
-                android:textAlignment="center"
-                android:textColor="@color/on_surface_variant"/>
-        </FrameLayout>
-
-        <!-- Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
+                android:layout_marginEnd="6dp"
+                android:text="Camera"
+                app:icon="@drawable/ic_camera"
+                app:iconSize="18dp"
+                app:backgroundTint="@color/primary"
+                style="@style/Widget.MaterialComponents.Button"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPickFiles"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Choose Files"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="Gallery"
+                app:icon="@drawable/ic_save"
+                app:iconSize="18dp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnScanAll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Scan All"
-                android:enabled="false"
-                app:backgroundTint="@color/secondary"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAddAll"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Save All Expenses"
-                android:enabled="false"
-                app:backgroundTint="@color/primary"/>
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnScanAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Scan All with AI"
+            android:enabled="false"
+            app:backgroundTint="@color/secondary"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save All Expenses"
+            android:enabled="false"
+            app:backgroundTint="@color/primary"/>
+
     </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</LinearLayout>
