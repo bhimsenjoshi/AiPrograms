@@ -342,27 +342,28 @@ $merges
         val sb = StringBuilder(); val ml = mutableListOf<String>(); var r = 1
         fun m(ref: String) = ml.add(ref)
 
-        m("A1:E1"); sb.row(r++,26){c("A",it,"DBT SETTLEMENT - OTHER EXPENSES",S2)}
-        m("A2:E2"); sb.row(r++,16){c("A",it,"(Cab & Etc)",S3)}
+        m("A1:F1"); sb.row(r++,26){c("A",it,"DBT SETTLEMENT - OTHER EXPENSES",S2)}
+        m("A2:F2"); sb.row(r++,16){c("A",it,"(Cab & Etc)",S3)}
         sb.row(r++,6){""}
         m("B4:D4")
-        sb.row(r++,20){c("A",it,"Name",S1)+c("B",it,trip.employeeName,S4)+c("E",it,"I.D. No.",S1)+c("F",it,trip.employeeId,S4)}
+        sb.row(r++,20){c("A",it,"Name",S1)+c("B",it,trip.employeeName,S4)+c("E",it,"I.D. No.",S1)+c("F",it,trip.employeeId,S4)+c("G",it,"",S0)}
         sb.row(r++,20){c("D",it,"Desg",S1)+c("E",it,trip.designation,S4)+c("F",it,"HOD",S1)}
         sb.row(r++,6){""}
         val h1=r; m("B${h1}:C${h1}")
-        sb.row(r++,20){c("A",it,"Date\n[DD/MM/YY]",S5)+c("B",it,"Destination",S5)+c("D",it,"Nature of Expenses",S5)+c("E",it,"Particulars",S5)+c("F",it,"Total",S5)}
+        sb.row(r++,20){c("A",it,"Date\n[DD/MM/YY]",S5)+c("B",it,"Destination",S5)+c("D",it,"Nature of Expenses",S5)+c("E",it,"Particulars",S5)+c("F",it,"Amount",S5)+c("G",it,"Ccy",S5)}
         sb.row(r++,18){c("B",it,"From",S5)+c("C",it,"To",S5)}
-        var total = 0.0
+        // For the total we only sum INR amounts; foreign-currency rows are noted separately
+        var totalInr = 0.0
         cabs.forEach { exp ->
-            sb.row(r++,18){c("A",it,exp.date,S4)+c("B",it,exp.fromCity,S4)+c("C",it,exp.toCity,S4)+c("D",it,exp.type.displayName,S4)+c("E",it,exp.description,S4)+cn("F",it,exp.amount)}
-            total += exp.amount
+            sb.row(r++,18){c("A",it,exp.date,S4)+c("B",it,exp.fromCity,S4)+c("C",it,exp.toCity,S4)+c("D",it,exp.type.displayName,S4)+c("E",it,exp.description,S4)+cn("F",it,exp.amount)+c("G",it,exp.currency,S4)}
+            if (exp.currency == "INR") totalInr += exp.amount
         }
         sb.row(r++,6){""}
-        m("A${r}:E${r}"); sb.row(r++,20){c("A",it,"Total",S8)+cn("F",it,total,S7)}
+        m("A${r}:E${r}"); sb.row(r++,20){c("A",it,"Total (INR)",S8)+cn("F",it,totalInr,S7)+c("G",it,"INR",S8)}
         sb.row(r++,6){""}
-        m("A${r}:F${r}"); sb.row(r++,16){c("A",it,COMPANY_FULL,S3)}
+        m("A${r}:G${r}"); sb.row(r++,16){c("A",it,COMPANY_FULL,S3)}
 
-        return ws(colDefs(12.0,14.0,14.0,16.0,28.0,12.0), sb.toString(), mc(*ml.toTypedArray()))
+        return ws(colDefs(12.0,14.0,14.0,16.0,28.0,12.0,8.0), sb.toString(), mc(*ml.toTypedArray()))
     }
 
     // ── Sheet 4 : DA_Tax exmp proofs ─────────────────────────────────────────
@@ -375,33 +376,35 @@ $merges
         val sb = StringBuilder(); val ml = mutableListOf<String>(); var r = 1
         fun m(ref: String) = ml.add(ref)
 
+        // Header row: span A:C for title, then employee info; columns now go to I
         m("A1:C1"); m("D1:E1"); m("G1:H1")
         sb.row(r++,26){c("A",it,"BUSINESS TRIP EXPENSE BILL SUBMISSION REPORT",S2)+c("D",it,"Employee Name",S1)+c("F",it,trip.employeeName,S4)+c("G",it,"Emp ID",S1)+c("H",it,trip.employeeId,S4)}
         sb.row(r++,6){""}
         m("C3:D3")
-        sb.row(r++,20){c("C",it,"Dept. / Section",S1)+c("E",it,trip.department,S4)+c("G",it,"Domestic",S1)}
+        sb.row(r++,20){c("C",it,"Dept. / Section",S1)+c("E",it,trip.department,S4)+c("G",it,"Domestic / International",S1)}
         sb.row(r++,6){""}
-        m("D5:G5")
-        sb.row(r++,20){c("A",it,"S. No",S5)+c("B",it,"Inv #",S5)+c("C",it,"Date",S5)+c("D",it,"Particulars",S5)+c("H",it,"INR",S5)}
+        // Table header: S.No | Inv# | Date | Particulars(D:F merged) | Ccy | Amount
+        m("D5:F5")
+        sb.row(r++,20){c("A",it,"S. No",S5)+c("B",it,"Inv #",S5)+c("C",it,"Date",S5)+c("D",it,"Particulars",S5)+c("G",it,"Ccy",S5)+c("H",it,"Amount",S5)}
 
-        var billTotal = 0.0; var sno = 1
+        var billInrTotal = 0.0; var sno = 1
         bills.forEach { exp ->
-            m("D${r}:G${r}")
-            sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,exp.receiptRef,S4)+c("C",it,exp.date,S4)+c("D",it,exp.description,S4)+cn("H",it,exp.amount)}
-            billTotal += exp.amount
+            m("D${r}:F${r}")
+            sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,exp.receiptRef,S4)+c("C",it,exp.date,S4)+c("D",it,exp.description,S4)+c("G",it,exp.currency,S4)+cn("H",it,exp.amount)}
+            if (exp.currency == "INR") billInrTotal += exp.amount
         }
-        repeat(3){m("D${r}:G${r}"); sb.row(r++,18){c("A",it,"",S4)+c("B",it,"",S4)+c("C",it,"",S4)+c("D",it,"",S4)+cn("H",it,0.0)}}
-        m("A${r}:G${r}"); sb.row(r++,20){c("A",it,"Total",S8)+cn("H",it,billTotal,S7)}
+        repeat(3){ m("D${r}:F${r}"); sb.row(r++,18){c("A",it,"",S4)+c("B",it,"",S4)+c("C",it,"",S4)+c("D",it,"",S4)+c("G",it,"",S4)+cn("H",it,0.0)}}
+        m("A${r}:F${r}"); sb.row(r++,20){c("A",it,"Total (INR bills only)",S8)+c("G",it,"INR",S8)+cn("H",it,billInrTotal,S7)}
         sb.row(r++,6){""}
         m("A${r}:H${r}"); sb.row(r++,28){c("A",it,"I hereby declare that the above information is true to the best of my knowledge and amounts are actually incurred for performing official duties.",S4)}
         sb.row(r++,6){""}
         m("B${r}:H${r}"); sb.row(r++,18){c("B",it,"OFFICE (FI) USE ONLY",S1)}
         sb.row(r++,6){""}
-        m("A${r}:G${r}"); sb.row(r++,18){c("A",it,"Total DA paid",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA)}
-        m("A${r}:G${r}"); sb.row(r++,18){c("A",it,"Exempt Amount [Bills submitted]",S1)+c("G",it,"Rs",S1)+cn("H",it,billTotal)}
-        m("A${r}:G${r}"); sb.row(r++,18){c("A",it,"Taxable amount",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA-billTotal)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Total DA paid",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Exempt Amount [INR bills submitted]",S1)+c("G",it,"Rs",S1)+cn("H",it,billInrTotal)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Taxable amount",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA-billInrTotal)}
 
-        return ws(colDefs(6.0,14.0,11.0,30.0,8.0,8.0,8.0,12.0), sb.toString(), mc(*ml.toTypedArray()))
+        return ws(colDefs(6.0,14.0,11.0,22.0,8.0,8.0,8.0,12.0), sb.toString(), mc(*ml.toTypedArray()))
     }
 
     // ── Build day rows ────────────────────────────────────────────────────────

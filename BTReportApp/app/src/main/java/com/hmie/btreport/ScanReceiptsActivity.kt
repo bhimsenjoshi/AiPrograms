@@ -101,6 +101,7 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
                     toCity = r.toCity,
                     receiptRef = r.receiptRef,
                     amount = r.amount,
+                    currency = r.currency,
                     imageUri = savedImage
                 )
             )

@@ -48,7 +48,12 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.tvStatus.text = "Review Parsed Data"
                     b.tvStatus.setTextColor(0xFF111827.toInt())
                     b.tvVendor.text = r.operator.ifBlank { r.description.take(28).ifBlank { "—" } }
-                    b.tvAmount.text = "₹${"%.2f".format(r.amount)}"
+                    val amtPrefix = when (r.currency) {
+                        "INR" -> "₹"; "KRW" -> "₩"; "SGD" -> "S$"; "USD" -> "$"
+                        "EUR" -> "€"; "JPY" -> "¥"; "GBP" -> "£"
+                        else  -> "${r.currency} "
+                    }
+                    b.tvAmount.text = "$amtPrefix${"%.2f".format(r.amount)}"
                     b.tvDate.text = r.date.ifBlank { "—" }
                     b.tvCategory.text = r.expenseType.displayName
                     if (r.fromCity.isNotBlank()) {

@@ -26,6 +26,7 @@ data class Expense(
     val toCity: String = "",
     val receiptRef: String = "",
     val amount: Double = 0.0,
+    val currency: String = "INR",    // ISO 4217 code: INR, KRW, SGD, USD, etc.
     val imageUri: String? = null     // path to locally saved receipt image
 )
 

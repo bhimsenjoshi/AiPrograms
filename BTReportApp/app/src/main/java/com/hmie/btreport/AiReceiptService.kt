@@ -343,11 +343,14 @@ class AiReceiptService(private val config: Config) {
             val type = try {
                 ExpenseType.valueOf(json.optString("expense_type", "OTHER").uppercase())
             } catch (e: Exception) { ExpenseType.OTHER }
+            val rawCurrency = json.optString("currency", "INR").trim().uppercase()
+            val currency = if (rawCurrency.length == 3) rawCurrency else "INR"
             ReceiptData(
                 expenseType = type,
                 date = json.optString("date", ""),
                 departureTime = json.optString("departure_time", ""),
                 amount = json.optDouble("amount", 0.0),
+                currency = currency,
                 description = json.optString("description", json.optString("operator", "")),
                 fromCity = json.optString("from_city", "").uppercase(),
                 toCity = json.optString("to_city", "").uppercase(),
@@ -369,7 +372,8 @@ Return ONLY a valid JSON object with NO markdown fences, NO extra text:
   "expense_type": "FLIGHT" or "CAB" or "FOOD" or "HOTEL" or "OTHER",
   "date": "dd-MMM-yyyy e.g. 22-Mar-2026",
   "departure_time": "HH:mm in 24-hour format e.g. 06:20",
-  "amount": total amount paid as a number in INR (0 if not shown),
+  "amount": total amount paid as a number (digits only, no currency symbols),
+  "currency": "ISO 4217 3-letter currency code e.g. INR, KRW, SGD, USD, EUR, JPY",
   "description": "e.g. IX-2934 HYD-BLR",
   "from_city": "IATA city code e.g. HYD",
   "to_city": "IATA city code e.g. BLR",
@@ -377,19 +381,35 @@ Return ONLY a valid JSON object with NO markdown fences, NO extra text:
   "operator": "airline or service name"
 }
 
+CRITICAL RULES for currency detection:
+- Look for currency symbols/codes printed on the receipt.
+  ₹ or Rs or INR → "INR" (India)
+  ₩ or KRW or W → "KRW" (South Korea)
+  S$ or SGD → "SGD" (Singapore)
+  $ or USD → "USD" (United States)
+  € or EUR → "EUR" (Europe)
+  ¥ or JPY → "JPY" (Japan)
+  £ or GBP → "GBP" (United Kingdom)
+- If no currency symbol is visible, infer from context: Korean taxi/restaurant → KRW, Singapore cab → SGD, Indian bill → INR.
+- Default to "INR" only if truly ambiguous.
+
 CRITICAL RULES for boarding passes (expense_type = FLIGHT):
 - departure_time MUST be filled. Every boarding pass prints a departure or STD time.
   Look for labels: "Dep", "Departure", "STD", "Departs", "Boarding", or a standalone time like "06:20".
   Convert to 24-hour HH:mm format. NEVER leave this blank for a FLIGHT.
-- from_city and to_city must be IATA codes. Common Indian codes:
-  HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai, MAA=Chennai, CCU=Kolkata, COK=Kochi.
-- receipt_ref = flight number (e.g. 6E-345, IX-2934, AI-101).
+- from_city and to_city must be IATA codes.
+  Indian: HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai, MAA=Chennai, CCU=Kolkata, COK=Kochi.
+  Korea: ICN=Seoul Incheon, GMP=Seoul Gimpo, PUS=Busan, CJU=Jeju.
+  Singapore: SIN=Singapore Changi.
+  Common international: NRT=Tokyo Narita, HND=Tokyo Haneda, DXB=Dubai, LHR=London, JFK=New York.
+- receipt_ref = flight number (e.g. 6E-345, IX-2934, OZ-101, SQ-425).
+- For international flights, currency is usually that of the country of departure or the booking currency.
 
 Other rules:
-- Cab receipt (Rapido/QuickRide/Ola/Uber/auto) → CAB. departure_time = "".
+- Cab receipt (Rapido/QuickRide/Ola/Uber/auto/KakaoTaxi/GrabCar) → CAB. departure_time = "".
 - Restaurant/cafe/food court → FOOD. departure_time = "".
 - Hotel/lodge → HOTEL. departure_time = "".
-- amount = final total paid in INR."""
+- amount = final total as printed (number only, no symbols)."""
 
         fun fromSettings(context: Context): AiReceiptService {
             val prefs = SettingsActivity.getPrefs(context)

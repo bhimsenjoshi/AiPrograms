@@ -90,6 +90,7 @@ class AddExpenseActivity : AppCompatActivity() {
         b.etToCity.setText(exp.toCity)
         b.etReceiptRef.setText(exp.receiptRef)
         b.etAmount.setText(exp.amount.toString())
+        b.etCurrency.setText(exp.currency)
     }
 
     private fun saveExpense(tripId: Int) {
@@ -100,6 +101,8 @@ class AddExpenseActivity : AppCompatActivity() {
         }
         val type = ExpenseType.values()[b.spinnerType.selectedItemPosition]
 
+        val currencyRaw = b.etCurrency.text.toString().trim().uppercase()
+        val currency = if (currencyRaw.length == 3) currencyRaw else "INR"
         val expense = Expense(
             id = vm.existingExpense?.id ?: 0,
             tripId = tripId,
@@ -110,7 +113,8 @@ class AddExpenseActivity : AppCompatActivity() {
             fromCity = b.etFromCity.text.toString().trim(),
             toCity = b.etToCity.text.toString().trim(),
             receiptRef = b.etReceiptRef.text.toString().trim(),
-            amount = amount
+            amount = amount,
+            currency = currency
         )
         vm.saveExpense(expense) {
             runOnUiThread {
