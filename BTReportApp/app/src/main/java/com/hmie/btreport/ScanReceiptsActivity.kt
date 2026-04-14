@@ -70,6 +70,25 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
         }
     }
 
+    fun rescanItem(index: Int) = viewModelScope.launch {
+        val context = getApplication<android.app.Application>()
+        val service = AiReceiptService.fromSettings(context)
+        val list = items.value ?: return@launch
+        if (index !in list.indices) return@launch
+
+        val item = list[index]
+        list[index] = item.copy(status = ScanStatus.SCANNING, result = null, error = null)
+        items.postValue(list.toMutableList())
+
+        try {
+            val result = service.analyzeReceipt(context, item.uri)
+            list[index] = item.copy(status = ScanStatus.SUCCESS, result = result, error = null)
+        } catch (e: Exception) {
+            list[index] = item.copy(status = ScanStatus.ERROR, result = null, error = e.message)
+        }
+        items.postValue(list.toMutableList())
+    }
+
     fun saveAllExpenses(tripId: Int, onDone: (Int, Int) -> Unit) = viewModelScope.launch {
         val context = getApplication<android.app.Application>()
         val list = items.value ?: return@launch
@@ -200,7 +219,7 @@ class ScanReceiptsActivity : AppCompatActivity() {
         supportActionBar?.title = "Scan Receipts"
         b.tvBanner.text = "Upload boarding passes, cab receipts or food bills (images or PDFs). AI will auto-identify type, extract amounts and route."
 
-        adapter = ScanResultAdapter()
+        adapter = ScanResultAdapter(onRescan = { index -> vm.rescanItem(index) })
         b.rvScanResults.layoutManager = LinearLayoutManager(this)
         b.rvScanResults.adapter = adapter
 

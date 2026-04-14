@@ -11,7 +11,9 @@ import com.hmie.btreport.ScanItem
 import com.hmie.btreport.ScanStatus
 import com.hmie.btreport.databinding.ItemScanResultBinding
 
-class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
+class ScanResultAdapter(
+    private val onRescan: (Int) -> Unit = {}
+) : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
 
     inner class VH(private val b: ItemScanResultBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(item: ScanItem) {
@@ -26,6 +28,7 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.tvStatusBadge.visibility = View.GONE
                     b.layoutResult.visibility = View.GONE
                     b.tvError.visibility = View.GONE
+                    b.btnRescan.visibility = View.GONE
                 }
                 ScanStatus.SCANNING -> {
                     b.progressScan.visibility = View.VISIBLE
@@ -36,6 +39,7 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.tvStatusBadge.text = "SCANNING"
                     b.layoutResult.visibility = View.GONE
                     b.tvError.visibility = View.GONE
+                    b.btnRescan.visibility = View.GONE
                 }
                 ScanStatus.SUCCESS -> {
                     b.progressScan.visibility = View.GONE
@@ -65,6 +69,8 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     }
                     b.layoutResult.visibility = View.VISIBLE
                     b.tvError.visibility = View.GONE
+                    b.btnRescan.visibility = View.VISIBLE
+                    b.btnRescan.setOnClickListener { onRescan(adapterPosition) }
                 }
                 ScanStatus.ERROR -> {
                     b.progressScan.visibility = View.GONE
@@ -76,6 +82,8 @@ class ScanResultAdapter : ListAdapter<ScanItem, ScanResultAdapter.VH>(DIFF) {
                     b.layoutResult.visibility = View.GONE
                     b.tvError.visibility = View.VISIBLE
                     b.tvError.text = item.error ?: "Unknown error"
+                    b.btnRescan.visibility = View.VISIBLE
+                    b.btnRescan.setOnClickListener { onRescan(adapterPosition) }
                 }
             }
         }

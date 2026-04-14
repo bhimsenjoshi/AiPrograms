@@ -169,6 +169,24 @@
                 android:textColor="@color/error"
                 android:visibility="gone"/>
 
+            <!-- Rescan button (shown on SUCCESS and ERROR) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRescan"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginTop="10dp"
+                android:text="Rescan"
+                android:textSize="12sp"
+                android:paddingHorizontal="14dp"
+                android:minHeight="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:strokeColor="@color/primary"
+                app:iconTint="@color/primary"
+                android:textColor="@color/primary"
+                android:visibility="gone"/>
+
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
