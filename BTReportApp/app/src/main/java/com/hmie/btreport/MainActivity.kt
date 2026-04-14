@@ -73,10 +73,10 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("About HMIE Expense")
                 .setMessage(
-                    "Version: 1.0\n\n" +
+                    "Version: 1.1\n\n" +
                     "Developed by: Bhimsen Joshi\n" +
                     "Contact: bhimsen.joshi@gmail.com\n\n" +
-                    "Release Date: 28 March 2026\n\n" +
+                    "Release Date: 14 April 2026\n\n" +
                     "© 2026 HMIE. All rights reserved."
                 )
                 .setPositiveButton("OK", null)
