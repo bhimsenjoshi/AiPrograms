@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hmie.btreport.BuildConfig
 import com.hmie.btreport.adapter.TripAdapter
 import com.hmie.btreport.databinding.ActivityMainBinding
 import com.hmie.btreport.db.AppDatabase
