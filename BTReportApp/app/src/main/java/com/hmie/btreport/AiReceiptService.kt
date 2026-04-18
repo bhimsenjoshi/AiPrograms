@@ -421,9 +421,13 @@ CRITICAL RULES for boarding passes (expense_type = FLIGHT):
 
 Other rules:
 - Cab receipt (Rapido/QuickRide/Ola/Uber/auto/KakaoTaxi/카카오택시/GrabCar/Grab) → CAB. departure_time = "".
-- Restaurant/cafe/food court → FOOD. departure_time = "".
+- Restaurant/cafe/food court/grocery delivery (Kwickbox/Blinkit/Zepto/Swiggy Instamart) → FOOD. departure_time = "".
 - Hotel/lodge → HOTEL. departure_time = "".
-- amount = final total as printed (number only, no symbols, remove comma separators)."""
+- CRITICAL for amount on multi-item bills (grocery/retail/restaurant):
+  Look for the FINAL grand total — the last bold/highlighted total at the bottom of the bill.
+  Labels to look for: "Grand Total", "Total Amount", "Invoice Total", "Net Payable", "Amount Payable", or the sum of "Invoice Value" + "Handling Fee" + any surcharge.
+  Do NOT use individual line item amounts. Do NOT use subtotals or "Invoice Value" alone if there are additional fees below it.
+- amount = final total as printed (number only, no symbols, remove comma separators, keep decimal point)."""
 
         fun fromSettings(context: Context): AiReceiptService {
             val prefs = SettingsActivity.getPrefs(context)
