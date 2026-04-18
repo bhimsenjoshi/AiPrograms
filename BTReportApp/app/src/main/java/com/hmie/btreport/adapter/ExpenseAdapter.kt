@@ -24,7 +24,16 @@ class ExpenseAdapter(
             b.tvExpenseDesc.text = exp.description.ifBlank {
                 if (exp.fromCity.isNotBlank()) "${exp.fromCity} → ${exp.toCity}" else "—"
             }
-            b.tvExpenseAmount.text = "₹${"%.0f".format(exp.amount)}"
+            val sym = when (exp.currency) {
+                "INR" -> "₹"; "KRW" -> "₩"; "SGD" -> "S$"; "USD" -> "$"
+                "EUR" -> "€"; "JPY" -> "¥"; "GBP" -> "£"
+                else  -> "${exp.currency} "
+            }
+            val fmt = if (exp.currency == "KRW" || exp.currency == "JPY")
+                "$sym${"%.0f".format(exp.amount)}"
+            else
+                "$sym${"%.2f".format(exp.amount)}"
+            b.tvExpenseAmount.text = fmt
             b.tvReceiptRef.text = exp.receiptRef.ifBlank { "" }
 
             // Category emoji icon
