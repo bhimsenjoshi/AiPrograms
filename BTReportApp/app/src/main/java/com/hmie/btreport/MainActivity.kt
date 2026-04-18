@@ -69,11 +69,12 @@ class MainActivity : AppCompatActivity() {
         b.navSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        b.btnSupport.text = "v${BuildConfig.VERSION_NAME}"
         b.btnSupport.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("About HMIE Expense")
                 .setMessage(
-                    "Version: 1.1\n\n" +
+                    "Version: ${BuildConfig.VERSION_NAME}\n\n" +
                     "Developed by: Bhimsen Joshi\n" +
                     "Contact: bhimsen.joshi@gmail.com\n\n" +
                     "Release Date: 14 April 2026\n\n" +
