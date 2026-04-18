@@ -114,19 +114,23 @@ class WordGenerator(private val context: Context) {
         } catch (e: Exception) { null }
     }
 
-    /** Renders page 1 of a PDF at 3× scale for sharp invoice text. */
+    /** Renders page 1 of a PDF; tries 2× then falls back to 1× if OOM. */
     private fun pdfToBitmap(path: String): Bitmap? {
-        return try {
-            val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
-            val renderer = PdfRenderer(pfd)
-            val page = renderer.openPage(0)
-            val scale = 3
-            val bmp = Bitmap.createBitmap(page.width * scale, page.height * scale, Bitmap.Config.ARGB_8888)
-            Canvas(bmp).drawColor(Color.WHITE)
-            page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-            page.close(); renderer.close()
-            bmp
-        } catch (e: Exception) { null }
+        for (scale in listOf(2, 1)) {
+            try {
+                val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
+                val renderer = PdfRenderer(pfd)
+                val page = renderer.openPage(0)
+                val bmp = Bitmap.createBitmap(page.width * scale, page.height * scale, Bitmap.Config.ARGB_8888)
+                Canvas(bmp).drawColor(Color.WHITE)
+                page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                page.close(); renderer.close()
+                return bmp
+            } catch (_: OutOfMemoryError) {
+                continue
+            } catch (e: Exception) { return null }
+        }
+        return null
     }
 
     private fun imageDims(path: String): Pair<Long, Long> {

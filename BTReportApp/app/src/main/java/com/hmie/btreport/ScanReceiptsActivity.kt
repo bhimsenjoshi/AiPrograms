@@ -100,6 +100,9 @@ class ScanReceiptsViewModel(app: android.app.Application) : AndroidViewModel(app
             // all other types matched by type+date+amount+route+description.
             val isDupe = if (r.expenseType == com.hmie.btreport.model.ExpenseType.FLIGHT) {
                 db.expenseDao().findFlightDuplicates(tripId, r.date, r.fromCity, r.toCity).isNotEmpty()
+            } else if (r.receiptRef.isNotBlank()) {
+                // Invoice/bill number is unique — use it as the primary duplicate key
+                db.expenseDao().findByReceiptRef(tripId, r.expenseType.name, r.date, r.receiptRef).isNotEmpty()
             } else {
                 val desc = if (r.description.isNotBlank()) r.description else r.operator
                 db.expenseDao().findDuplicates(tripId, r.expenseType.name, r.date, r.amount, r.fromCity, r.toCity, desc).isNotEmpty()

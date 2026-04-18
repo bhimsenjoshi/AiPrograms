@@ -427,7 +427,9 @@ Other rules:
   Look for the FINAL grand total — the last bold/highlighted total at the bottom of the bill.
   Labels to look for: "Grand Total", "Total Amount", "Invoice Total", "Net Payable", "Amount Payable", or the sum of "Invoice Value" + "Handling Fee" + any surcharge.
   Do NOT use individual line item amounts. Do NOT use subtotals or "Invoice Value" alone if there are additional fees below it.
-- amount = final total as printed (number only, no symbols, remove comma separators, keep decimal point)."""
+- CRITICAL for amount formatting: the period (.) in an amount is a DECIMAL POINT, never a thousands separator.
+  Examples: "911.57" → 911.57 (NOT 91157 or 911). "1,234.50" → 1234.50 (remove comma, keep dot). "50,000" → 50000 (comma is thousands separator here, no decimal).
+- amount = final total as a decimal number (digits and one optional dot only, no currency symbols, no commas)."""
 
         fun fromSettings(context: Context): AiReceiptService {
             val prefs = SettingsActivity.getPrefs(context)

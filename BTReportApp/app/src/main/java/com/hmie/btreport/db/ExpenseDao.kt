@@ -32,6 +32,17 @@ interface ExpenseDao {
     ): List<Expense>
 
     /**
+     * Bill duplicate check by invoice/receipt reference number.
+     * Used when the AI extracts a non-blank receiptRef — invoice numbers are unique per bill.
+     */
+    @Query("""SELECT * FROM expenses WHERE tripId = :tripId AND type = :type AND date = :date
+              AND LOWER(TRIM(receiptRef)) = LOWER(TRIM(:receiptRef))
+              AND receiptRef != ''""")
+    suspend fun findByReceiptRef(
+        tripId: Int, type: String, date: String, receiptRef: String
+    ): List<Expense>
+
+    /**
      * Flight-specific duplicate check: same route on same date = same flight.
      * Ignores amount (often 0 on boarding passes) and description (varies between scans).
      */
