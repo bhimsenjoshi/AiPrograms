@@ -114,29 +114,18 @@ class WordGenerator(private val context: Context) {
         } catch (e: Exception) { null }
     }
 
-    /** Renders ALL pages of a PDF stitched vertically into one JPEG byte array. */
+    /** Renders page 1 of a PDF at 3× scale for sharp invoice text. */
     private fun pdfToBitmap(path: String): Bitmap? {
         return try {
             val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
             val renderer = PdfRenderer(pfd)
-            val scale = 2
-            val pages = (0 until renderer.pageCount).map { i ->
-                val page = renderer.openPage(i)
-                val bmp = Bitmap.createBitmap(page.width * scale, page.height * scale, Bitmap.Config.ARGB_8888)
-                Canvas(bmp).drawColor(Color.WHITE)
-                page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                page.close()
-                bmp
-            }
-            renderer.close()
-            val width = pages.maxOf { it.width }
-            val totalH = pages.sumOf { it.height }
-            val stitched = Bitmap.createBitmap(width, totalH, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(stitched)
-            canvas.drawColor(Color.WHITE)
-            var y = 0
-            pages.forEach { bmp -> canvas.drawBitmap(bmp, 0f, y.toFloat(), null); y += bmp.height; bmp.recycle() }
-            stitched
+            val page = renderer.openPage(0)
+            val scale = 3
+            val bmp = Bitmap.createBitmap(page.width * scale, page.height * scale, Bitmap.Config.ARGB_8888)
+            Canvas(bmp).drawColor(Color.WHITE)
+            page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            page.close(); renderer.close()
+            bmp
         } catch (e: Exception) { null }
     }
 
@@ -145,13 +134,10 @@ class WordGenerator(private val context: Context) {
             try {
                 val pfd = ParcelFileDescriptor.open(File(path), ParcelFileDescriptor.MODE_READ_ONLY)
                 val renderer = PdfRenderer(pfd)
-                val page0 = renderer.openPage(0)
-                val pw = page0.width.coerceAtLeast(1)
-                val ph = page0.height.coerceAtLeast(1)
-                page0.close()
-                val pageCount = renderer.pageCount
-                renderer.close()
-                Pair(pw, ph * pageCount)   // approximate total height
+                val page = renderer.openPage(0)
+                val pair = Pair(page.width.coerceAtLeast(1), page.height.coerceAtLeast(1))
+                page.close(); renderer.close()
+                pair
             } catch (e: Exception) { Pair(595, 842) }
         } else {
             val opts = BitmapFactory.Options().also { it.inJustDecodeBounds = true }
