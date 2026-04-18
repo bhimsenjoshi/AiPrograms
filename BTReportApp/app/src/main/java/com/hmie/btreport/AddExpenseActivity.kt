@@ -45,7 +45,7 @@ class AddExpenseViewModel(app: android.app.Application) : AndroidViewModel(app) 
 
     fun reanalyze(onResult: (ReceiptData) -> Unit, onError: (String) -> Unit) = viewModelScope.launch {
         val context = getApplication<android.app.Application>()
-        val imagePath = existingExpense?.imageUri ?: run { onError("No receipt image saved"); return@launch }
+        val imagePath = existingExpense?.imageUri ?: run { onError("No receipt image is saved for this expense. Re-analyze is only available for bills that were scanned from a file or camera."); return@launch }
         val service = AiReceiptService.fromSettings(context)
         try {
             val uri = Uri.fromFile(File(imagePath))
@@ -90,11 +90,9 @@ class AddExpenseActivity : AppCompatActivity() {
 
         if (expId != 0) {
             supportActionBar?.title = "Edit Expense"
+            b.btnReanalyze.visibility = View.VISIBLE
             vm.loadExpenseById(tripId, expId) { exp ->
-                runOnUiThread {
-                    populate(exp)
-                    if (exp.imageUri != null) b.btnReanalyze.visibility = View.VISIBLE
-                }
+                runOnUiThread { populate(exp) }
             }
         } else {
             supportActionBar?.title = "Add Expense"
