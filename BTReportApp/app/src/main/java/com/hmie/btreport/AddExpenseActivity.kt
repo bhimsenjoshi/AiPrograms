@@ -1,7 +1,9 @@
 package com.hmie.btreport
 
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -12,7 +14,9 @@ import com.hmie.btreport.databinding.ActivityAddExpenseBinding
 import com.hmie.btreport.db.AppDatabase
 import com.hmie.btreport.model.Expense
 import com.hmie.btreport.model.ExpenseType
+import com.hmie.btreport.model.ReceiptData
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,6 +41,19 @@ class AddExpenseViewModel(app: android.app.Application) : AndroidViewModel(app) 
         if (expense.id == 0) db.expenseDao().insertExpense(expense)
         else db.expenseDao().updateExpense(expense)
         onDone()
+    }
+
+    fun reanalyze(onResult: (ReceiptData) -> Unit, onError: (String) -> Unit) = viewModelScope.launch {
+        val context = getApplication<android.app.Application>()
+        val imagePath = existingExpense?.imageUri ?: run { onError("No receipt image saved"); return@launch }
+        val service = AiReceiptService.fromSettings(context)
+        try {
+            val uri = Uri.fromFile(File(imagePath))
+            val result = service.analyzeReceipt(context, uri)
+            onResult(result)
+        } catch (e: Exception) {
+            onError(e.message ?: "Analysis failed")
+        }
     }
 }
 
@@ -73,9 +90,36 @@ class AddExpenseActivity : AppCompatActivity() {
 
         if (expId != 0) {
             supportActionBar?.title = "Edit Expense"
-            vm.loadExpenseById(tripId, expId) { exp -> runOnUiThread { populate(exp) } }
+            vm.loadExpenseById(tripId, expId) { exp ->
+                runOnUiThread {
+                    populate(exp)
+                    if (exp.imageUri != null) b.btnReanalyze.visibility = View.VISIBLE
+                }
+            }
         } else {
             supportActionBar?.title = "Add Expense"
+        }
+
+        b.btnReanalyze.setOnClickListener {
+            b.btnReanalyze.isEnabled = false
+            b.btnReanalyze.text = "Analyzing…"
+            vm.reanalyze(
+                onResult = { result ->
+                    runOnUiThread {
+                        populateFromReceiptData(result)
+                        b.btnReanalyze.isEnabled = true
+                        b.btnReanalyze.text = "Re-analyze with AI"
+                        Toast.makeText(this, "Fields updated — review and save", Toast.LENGTH_LONG).show()
+                    }
+                },
+                onError = { error ->
+                    runOnUiThread {
+                        b.btnReanalyze.isEnabled = true
+                        b.btnReanalyze.text = "Re-analyze with AI"
+                        Toast.makeText(this, "Analysis failed: $error", Toast.LENGTH_LONG).show()
+                    }
+                }
+            )
         }
 
         b.btnSave.setOnClickListener { saveExpense(tripId) }
@@ -91,6 +135,19 @@ class AddExpenseActivity : AppCompatActivity() {
         b.etReceiptRef.setText(exp.receiptRef)
         b.etAmount.setText(exp.amount.toString())
         b.etCurrency.setText(exp.currency)
+    }
+
+    private fun populateFromReceiptData(r: ReceiptData) {
+        b.spinnerType.setSelection(ExpenseType.values().indexOfFirst { it == r.expenseType })
+        if (r.date.isNotBlank()) b.etDate.setText(r.date)
+        b.etDepartureTime.setText(r.departureTime)
+        val desc = r.description.ifBlank { r.operator }
+        if (desc.isNotBlank()) b.etDescription.setText(desc)
+        if (r.fromCity.isNotBlank()) b.etFromCity.setText(r.fromCity)
+        if (r.toCity.isNotBlank()) b.etToCity.setText(r.toCity)
+        if (r.receiptRef.isNotBlank()) b.etReceiptRef.setText(r.receiptRef)
+        if (r.amount > 0) b.etAmount.setText(r.amount.toString())
+        if (r.currency.isNotBlank()) b.etCurrency.setText(r.currency)
     }
 
     private fun saveExpense(tripId: Int) {

@@ -143,6 +143,18 @@
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReanalyze"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Re-analyze with AI"
+                android:textSize="14sp"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

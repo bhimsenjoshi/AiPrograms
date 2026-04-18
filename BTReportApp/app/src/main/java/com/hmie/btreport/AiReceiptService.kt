@@ -366,6 +366,8 @@ class AiReceiptService(private val config: Config) {
 
     companion object {
         const val RECEIPT_PROMPT = """You are extracting structured data from a business travel receipt or boarding pass image.
+The receipt may be in ANY language including Korean (한국어), Hindi, Tamil, Chinese, Japanese, or others.
+Read all text carefully regardless of script.
 
 Return ONLY a valid JSON object with NO markdown fences, NO extra text:
 {
@@ -384,32 +386,41 @@ Return ONLY a valid JSON object with NO markdown fences, NO extra text:
 CRITICAL RULES for currency detection:
 - Look for currency symbols/codes printed on the receipt.
   ₹ or Rs or INR → "INR" (India)
-  ₩ or KRW or W → "KRW" (South Korea)
+  ₩ or 원 or KRW or W → "KRW" (South Korea)
   S$ or SGD → "SGD" (Singapore)
   $ or USD → "USD" (United States)
   € or EUR → "EUR" (Europe)
   ¥ or JPY → "JPY" (Japan)
   £ or GBP → "GBP" (United Kingdom)
-- If no currency symbol is visible, infer from context: Korean taxi/restaurant → KRW, Singapore cab → SGD, Indian bill → INR.
+- If no currency symbol is visible, infer from context: Korean text/Hangul → KRW, Singapore → SGD, Indian → INR.
 - Default to "INR" only if truly ambiguous.
+
+KOREAN RECEIPT RULES (if text contains Hangul 한글):
+- 영수증 = receipt, 합계 or 총액 or 결제금액 = total amount, 부가세 or VAT = tax (included in total).
+- Date formats: YYYY.MM.DD or YYYY년 MM월 DD일 or YYYY/MM/DD → convert to dd-MMM-yyyy.
+- 택시 or 카카오택시 or 카카오T or 우티(UT) → CAB (currency KRW).
+- 식당 or 음식 or 레스토랑 or 카페 or 편의점 → FOOD (currency KRW).
+- 호텔 or 숙박 → HOTEL (currency KRW).
+- Korean amounts use comma separators: 50,000원 = 50000 KRW.
+- operator: use the Korean brand name transliterated if visible (e.g. 롯데호텔→Lotte Hotel, 신라호텔→Shilla Hotel, 카카오택시→KakaoTaxi).
 
 CRITICAL RULES for boarding passes (expense_type = FLIGHT):
 - departure_time MUST be filled. Every boarding pass prints a departure or STD time.
-  Look for labels: "Dep", "Departure", "STD", "Departs", "Boarding", or a standalone time like "06:20".
+  Look for labels: "Dep", "Departure", "STD", "Departs", "출발" (Korean), or a standalone time like "06:20".
   Convert to 24-hour HH:mm format. NEVER leave this blank for a FLIGHT.
 - from_city and to_city must be IATA codes.
   Indian: HYD=Hyderabad, BLR=Bengaluru, PNQ=Pune, DEL=Delhi, BOM=Mumbai, MAA=Chennai, CCU=Kolkata, COK=Kochi.
   Korea: ICN=Seoul Incheon, GMP=Seoul Gimpo, PUS=Busan, CJU=Jeju.
   Singapore: SIN=Singapore Changi.
   Common international: NRT=Tokyo Narita, HND=Tokyo Haneda, DXB=Dubai, LHR=London, JFK=New York.
-- receipt_ref = flight number (e.g. 6E-345, IX-2934, OZ-101, SQ-425).
-- For international flights, currency is usually that of the country of departure or the booking currency.
+- receipt_ref = flight number (e.g. 6E-345, IX-2934, OZ-101, SQ-425, KE-123).
+- For international flights, currency is usually that of the booking currency shown on the pass.
 
 Other rules:
-- Cab receipt (Rapido/QuickRide/Ola/Uber/auto/KakaoTaxi/GrabCar) → CAB. departure_time = "".
+- Cab receipt (Rapido/QuickRide/Ola/Uber/auto/KakaoTaxi/카카오택시/GrabCar/Grab) → CAB. departure_time = "".
 - Restaurant/cafe/food court → FOOD. departure_time = "".
 - Hotel/lodge → HOTEL. departure_time = "".
-- amount = final total as printed (number only, no symbols)."""
+- amount = final total as printed (number only, no symbols, remove comma separators)."""
 
         fun fromSettings(context: Context): AiReceiptService {
             val prefs = SettingsActivity.getPrefs(context)
