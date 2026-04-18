@@ -62,10 +62,15 @@ class WordGenerator(private val context: Context) {
             val bytes = loadResized(path) ?: return@forEach   // handles both images and PDFs
             val (cx, cy) = imageDims(path)
             val rId = "rId${imgIdx + 2}"   // rId1=styles, rId2=settings, rId3+ = images
+            val ccySymbol = when (exp.currency) {
+                "INR" -> "₹"; "KRW" -> "₩"; "SGD" -> "S$"; "USD" -> "$"
+                "EUR" -> "€"; "JPY" -> "¥"; "GBP" -> "£"
+                else  -> "${exp.currency} "
+            }
             images.add(ImgEntry(rId, "image${imgIdx}.jpg", bytes, cx, cy, exp.type,
                 "${exp.type.displayName} – ${exp.date}" +
                 (if (exp.fromCity.isNotBlank()) " (${exp.fromCity}→${exp.toCity})" else "") +
-                (if (exp.amount > 0) " Rs.${"%.0f".format(exp.amount)}" else "")))
+                (if (exp.amount > 0) " $ccySymbol${"%.0f".format(exp.amount)}" else "")))
             imgIdx++
         }
 

@@ -398,11 +398,13 @@ CRITICAL RULES for currency detection:
 
 KOREAN RECEIPT RULES (if text contains Hangul 한글):
 - 영수증 = receipt, 합계 or 총액 or 결제금액 = total amount, 부가세 or VAT = tax (included in total).
-- Date formats: YYYY.MM.DD or YYYY년 MM월 DD일 or YYYY/MM/DD → convert to dd-MMM-yyyy.
+- CRITICAL Korean date rule: In "N월 M일", 월 means MONTH and 일 means DAY.
+  So "4월 11일" = Month 4 (April), Day 11 → output "11-Apr-2026". NEVER use the month number as the day.
+  Other formats: YYYY.MM.DD (e.g. 2026.04.11 → 11-Apr-2026), YYYY/MM/DD, YYYY년 MM월 DD일.
 - 택시 or 카카오택시 or 카카오T or 우티(UT) → CAB (currency KRW).
 - 식당 or 음식 or 레스토랑 or 카페 or 편의점 → FOOD (currency KRW).
 - 호텔 or 숙박 → HOTEL (currency KRW).
-- Korean amounts use comma separators: 50,000원 = 50000 KRW.
+- Korean amounts use comma separators: 50,000원 = 50000 KRW. Remove commas, output digits only.
 - operator: use the Korean brand name transliterated if visible (e.g. 롯데호텔→Lotte Hotel, 신라호텔→Shilla Hotel, 카카오택시→KakaoTaxi).
 
 CRITICAL RULES for boarding passes (expense_type = FLIGHT):

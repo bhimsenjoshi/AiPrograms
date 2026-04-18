@@ -140,6 +140,20 @@ class ExcelGenerator(private val context: Context) {
   </cellXfs>
 </styleSheet>"""
 
+    // ── Currency formatting ───────────────────────────────────────────────────
+
+    private fun fmtAmt(amount: Double, currency: String): String {
+        val sym = when (currency) {
+            "INR" -> "₹"; "KRW" -> "₩"; "SGD" -> "S$"; "USD" -> "$"
+            "EUR" -> "€"; "JPY" -> "¥"; "GBP" -> "£"
+            else  -> "$currency "
+        }
+        return if (currency == "KRW" || currency == "JPY")
+            "$sym${"%,.0f".format(amount)}"
+        else
+            "$sym${"%,.2f".format(amount)}"
+    }
+
     // ── Cell / row helpers ────────────────────────────────────────────────────
 
     private fun c(col: String, row: Int, v: String, s: Int = S0) =
@@ -355,11 +369,11 @@ $merges
         // For the total we only sum INR amounts; foreign-currency rows are noted separately
         var totalInr = 0.0
         cabs.forEach { exp ->
-            sb.row(r++,18){c("A",it,exp.date,S4)+c("B",it,exp.fromCity,S4)+c("C",it,exp.toCity,S4)+c("D",it,exp.type.displayName,S4)+c("E",it,exp.description,S4)+cn("F",it,exp.amount)+c("G",it,exp.currency,S4)}
+            sb.row(r++,18){c("A",it,exp.date,S4)+c("B",it,exp.fromCity,S4)+c("C",it,exp.toCity,S4)+c("D",it,exp.type.displayName,S4)+c("E",it,exp.description,S4)+c("F",it,fmtAmt(exp.amount,exp.currency),S4)+c("G",it,exp.currency,S4)}
             if (exp.currency == "INR") totalInr += exp.amount
         }
         sb.row(r++,6){""}
-        m("A${r}:E${r}"); sb.row(r++,20){c("A",it,"Total (INR)",S8)+cn("F",it,totalInr,S7)+c("G",it,"INR",S8)}
+        m("A${r}:E${r}"); sb.row(r++,20){c("A",it,"Total (INR only)",S8)+c("F",it,fmtAmt(totalInr,"INR"),S8)+c("G",it,"INR",S8)}
         sb.row(r++,6){""}
         m("A${r}:G${r}"); sb.row(r++,16){c("A",it,COMPANY_FULL,S3)}
 
@@ -390,19 +404,19 @@ $merges
         var billInrTotal = 0.0; var sno = 1
         bills.forEach { exp ->
             m("D${r}:F${r}")
-            sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,exp.receiptRef,S4)+c("C",it,exp.date,S4)+c("D",it,exp.description,S4)+c("G",it,exp.currency,S4)+cn("H",it,exp.amount)}
+            sb.row(r++,18){c("A",it,"${sno++}",S4)+c("B",it,exp.receiptRef,S4)+c("C",it,exp.date,S4)+c("D",it,exp.description,S4)+c("G",it,exp.currency,S4)+c("H",it,fmtAmt(exp.amount,exp.currency),S4)}
             if (exp.currency == "INR") billInrTotal += exp.amount
         }
-        repeat(3){ m("D${r}:F${r}"); sb.row(r++,18){c("A",it,"",S4)+c("B",it,"",S4)+c("C",it,"",S4)+c("D",it,"",S4)+c("G",it,"",S4)+cn("H",it,0.0)}}
-        m("A${r}:F${r}"); sb.row(r++,20){c("A",it,"Total (INR bills only)",S8)+c("G",it,"INR",S8)+cn("H",it,billInrTotal,S7)}
+        repeat(3){ m("D${r}:F${r}"); sb.row(r++,18){c("A",it,"",S4)+c("B",it,"",S4)+c("C",it,"",S4)+c("D",it,"",S4)+c("G",it,"",S4)+c("H",it,"",S4)}}
+        m("A${r}:F${r}"); sb.row(r++,20){c("A",it,"Total (INR bills only)",S8)+c("G",it,"INR",S8)+c("H",it,fmtAmt(billInrTotal,"INR"),S8)}
         sb.row(r++,6){""}
         m("A${r}:H${r}"); sb.row(r++,28){c("A",it,"I hereby declare that the above information is true to the best of my knowledge and amounts are actually incurred for performing official duties.",S4)}
         sb.row(r++,6){""}
         m("B${r}:H${r}"); sb.row(r++,18){c("B",it,"OFFICE (FI) USE ONLY",S1)}
         sb.row(r++,6){""}
-        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Total DA paid",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA)}
-        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Exempt Amount [INR bills submitted]",S1)+c("G",it,"Rs",S1)+cn("H",it,billInrTotal)}
-        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Taxable amount",S1)+c("G",it,"Rs",S1)+cn("H",it,totalDA-billInrTotal)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Total DA paid",S1)+c("G",it,"INR",S1)+c("H",it,fmtAmt(totalDA,"INR"),S4)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Exempt Amount [INR bills submitted]",S1)+c("G",it,"INR",S1)+c("H",it,fmtAmt(billInrTotal,"INR"),S4)}
+        m("A${r}:F${r}"); sb.row(r++,18){c("A",it,"Taxable amount",S1)+c("G",it,"INR",S1)+c("H",it,fmtAmt(totalDA-billInrTotal,"INR"),S4)}
 
         return ws(colDefs(6.0,14.0,11.0,22.0,8.0,8.0,8.0,12.0), sb.toString(), mc(*ml.toTypedArray()))
     }
