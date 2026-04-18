@@ -58,8 +58,9 @@ class AiReceiptService(private val config: Config) {
     // ── Public ────────────────────────────────────────────────────────────────
 
     suspend fun analyzeReceipt(context: Context, uri: Uri): ReceiptData = withContext(Dispatchers.IO) {
-        val contentType = context.contentResolver.getType(uri) ?: "image/jpeg"
-        val imageBytes = if (contentType == "application/pdf") pdfToImageBytes(context, uri)
+        val isPdf = context.contentResolver.getType(uri) == "application/pdf"
+                 || uri.path?.endsWith(".pdf", ignoreCase = true) == true
+        val imageBytes = if (isPdf) pdfToImageBytes(context, uri)
                          else compressImage(context, uri)
         val base64 = Base64.getEncoder().encodeToString(imageBytes)
 
